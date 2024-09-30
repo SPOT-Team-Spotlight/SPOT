@@ -5,13 +5,18 @@ from langchain_openai import OpenAIEmbeddings  # 새로운 모듈에서 임포�
 from langchain.schema import Document
 import numpy as np
 from crawling.datas.data import Data
+from langchain_huggingface import HuggingFaceEmbeddings
+from openai import OpenAI
 
 # .env 파일에서 API 키 로드 (환경 변수 설정)
 load_dotenv()
-openai_api_key = os.getenv("OPENAI_API_KEY")
+# openai_api_key = os.getenv("OPENAI_API_KEY")
+upstage_api_key = os.getenv("UPSTAGE_API_KEY")
 
-# OpenAI 임베딩 객체 생성
-embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key, model="text-embedding-3-small")
+client = OpenAI(
+    api_key=upstage_api_key,
+    base_url="https://api.upstage.ai/v1/solar"
+)
 
 # Faiss 벡터 스토어 인스턴스 생성
 vector_store = FaissVectorStore()
@@ -23,8 +28,11 @@ def get_openai_embedding(text):
     :param text: 임베딩 할 텍스트
     :return: 임베딩 벡터
     """
-    embedding = embeddings.embed_query(text)
-    return np.array(embedding, dtype=np.float32)
+    response = client.embeddings.create(
+        input=text,
+        model="solar-embedding-1-large-query"
+    )
+    return np.array(response.data[0].embedding, dtype=np.float32)
 
 def saveToVDB(data: Data):
     """
@@ -74,6 +82,7 @@ def searchVDB(query : str = "검색할 문장",
             results.append({
                 "title": meta.get("title", "Unknown"),
                 "similarity": float(D[0][idx]),
+                "desc": meta.get("desc", "설명 없음"),
                 "summary": meta.get("summary", "Unknown"),
                 "link":meta.get("link","https://none")
             })

@@ -35,7 +35,7 @@ def crawling_naver_blog_data(query: str = "검색 할 단어 ",
         }
 
         start = 1
-        display = 100
+        display = 10
         sort = "sim"
 
         url = f"{base_url}?query={enc_text}&display={display}&start={start}&sort={sort}"

@@ -39,7 +39,7 @@ class FaissVectorStore:
         with open(self.metadata_file, 'wb') as f:
             pickle.dump(self.metadata, f)
 
-    def add_to_index(self, vector_dict, metadata):
+    def add_to_index(self, vector_dict : dict, metadata):
         """
         벡터 딕셔너리와 메타데이터를 인덱스에 추가합니다.
         :param vector_dict: 추가할 벡터 데이터가 포함된 딕셔너리

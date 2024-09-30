@@ -80,8 +80,3 @@ if __name__ == "__main__":
                     print(count, ":", result[i])
         elif user_input == '0':
             print("종료합니다")
-
-    
-
-
-
