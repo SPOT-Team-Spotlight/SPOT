@@ -14,7 +14,7 @@ class FaissVectorStore:
         self.metadata_file = metadata_file
         self.index = None
         self.metadata = list()
-        self.dim = None  
+        self.dim = 1536  
         self.load_index()
 
     def load_index(self):
