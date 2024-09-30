@@ -1,21 +1,18 @@
 import os
 from vectorStore.FaissVectorStore import FaissVectorStore
 from dotenv import load_dotenv
-from langchain_openai import OpenAIEmbeddings  # 새로운 모듈에서 임포트
 from langchain.schema import Document
 import numpy as np
 from crawling.datas.data import Data
-from langchain_huggingface import HuggingFaceEmbeddings
-from openai import OpenAI
+from langchain_upstage import UpstageEmbeddings
 
 # .env 파일에서 API 키 로드 (환경 변수 설정)
 load_dotenv()
-# openai_api_key = os.getenv("OPENAI_API_KEY")
 upstage_api_key = os.getenv("UPSTAGE_API_KEY")
 
-client = OpenAI(
-    api_key=upstage_api_key,
-    base_url="https://api.upstage.ai/v1/solar"
+embeddings = UpstageEmbeddings(
+    upstage_api_key=upstage_api_key,
+    model="solar-embedding-1-large"
 )
 
 # Faiss 벡터 스토어 인스턴스 생성
@@ -28,11 +25,8 @@ def get_openai_embedding(text):
     :param text: 임베딩 할 텍스트
     :return: 임베딩 벡터
     """
-    response = client.embeddings.create(
-        input=text,
-        model="solar-embedding-1-large-query"
-    )
-    return np.array(response.data[0].embedding, dtype=np.float32)
+    query_result = embeddings.embed_query(text)
+    return np.array(query_result, dtype=np.float32)
 
 def saveToVDB(data: Data):
     """
