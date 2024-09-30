@@ -1,63 +1,88 @@
 """
-웹 크롤링을 통해서 Faiss DB셋을 만드는 프로그램
+웹 크롤링을 통해서 Faiss DB를 만드는 프로그램
 """
 # API 키를 환경변수로 관리하기 위한 설정 파일
 from dotenv import load_dotenv
+from vectorMgr import saveToVDB, searchVDB
+from crawling.crawling import start_crawling, make_datas
 
-from app.gpt_service import extract_keywords
-from google_service import fetch_top_restaurants_nearby
-from vectorDB import saveToVDB, searchVDB
-from rDB import saveToRDB
+user_input = int()
+
 
 # API 키 정보 로드
 load_dotenv()
 
-def create(region : str = "데이터 크롤링 할 지역",
-           keyword : str = "크롤링 할 단어",
-        naverSize : int = "네이버 API에서 들고 올 블로그 수",
-        googleSize : int = "구글 API에서 들고 올 정보 개수"):
+def find(region : str = "데이터 크롤링 할 지역",
+         keyword : str = "크롤링 할 단어"):
     """
-    필요한 데이터를 크롤링 한 다음, Faiss 파일로 만들어주는 함수
-    """ 
-    # 네이버 API 검색 -> 저장
+    정보를 찾고, 데이터를 만들어서 반환해주는 함수
+    """
+    infos = start_crawling(keyword=keyword, region=region)
+    infos = make_datas(infos)
 
-    # naverList = fetch_naver_blog_data(query=keyword, region=region, number=naverSize)
-
-
-
-    # 구글 API 검색 -> 저장
-    googleList = fetch_top_restaurants_nearby(search_term=keyword,region=region,number=googleSize)
-    save(googleList)
+    return infos
 
 def save(datas : list = "SearchResult list를 주면 DB에 저장하는 함수"):
     """
     크롤링한 데이터를 저장하는 함수
     """
+    for data in datas: 
+        saveToVDB(data=data)
 
-
-    for data in datas:
-        pk = saveToRDB(data=data)
-        saveToVDB(data=data, fk=pk)
-
-def show():
-    pass
+def interface():
+    """
+    간단 인터페이스
+    """
+    message = """
+        DB 형성 프로그램\n
+        숫자를 입력하시면 해당 행동을 실행합니다 
+        1 : db 형성
+        2 : db 조회
+        0 : 종료
+        """
+    print(message)    
 
 if __name__ == "__main__":
-    # 서초동에 있는 맛집 데이터를 google api를 통해서 찾아오고 vdb로 저장하는 코드
-    # TODO: 인터페이스 만들기
-    keywords = "한식" #사용자의 입력과 연결.
-    keyword = keywords[0] if isinstance(keywords, list) else keywords # 추출된 키워드의 첫번째키워드만 검색이긴한데, 이걸 음식의 종류로 추출해야함. (회, 돼지고기 이런식으로 ㅇㅇ)
-    create(region="서울", keyword=keyword, naverSize=0, googleSize=100)
 
-    # 지금 테스트 중
+    user_input = str()
 
-    result = searchVDB(query="회", search_amount=3)
-    print(f"vdb 검색 쿼리 : 회")
-    if result:
-        for r in result:
-            print(f"{r['title']} : {r['link']}")
-    else:
-        print("검색 결과가 없습니다.")
+    while user_input != '0':
+        interface()
+
+        user_input = input("입력해 주세요: ")
+
+        if user_input == '1':
+            print("==DB생성==")
+            region = input("지역을 입력해 주세요: ")
+            keyword = input("키워드를 입력해 주세요: ")
+            print(f"region:{region},keyword:{keyword}로 크롤링 중입니다... 잠시 기다려 주세요.") 
+           
+            result = find(keyword=keyword, region=region)
+            print(f"검색 완료! DB 생성중입니다...") 
+            save(result)
+            print(f"DB 생성이 완료되었습니다...") 
+
+        elif user_input == '2':
+            print("==DB조회==")
+            keyword = input("키워드를 입력해 주세요: ")
+            search_amount = input("가져올 개수를 입력해 주세요: ")
+            print(f"keyword:{keyword}를 DB에서 검색 중입니다... 잠시 기다려 주세요.") 
+            result = searchVDB(query=keyword, search_amount=int(search_amount))
+            
+            print(f"검색된 결과 {len(result)}개 입니다.")
+            count = 1
+            print(count, ":", result[0])
+
+            more = input("더보기 y, 그만 보기 n : ")
+
+            if(more == 'y'):
+                for i in range(1, len(result)):
+                    count +=1
+                    print(count, ":", result[i])
+        elif user_input == '0':
+            print("종료합니다")
+
+    
 
 
 

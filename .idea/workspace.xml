@@ -1,55 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="AutoImportSettings">
-    <option name="autoReloadType" value="SELECTIVE" />
-  </component>
   <component name="ChangeListManager">
-    <list default="true" id="6377c7f6-a7c3-4ce4-a2b2-951a7b19679c" name="Changes" comment="">
+    <list default="true" id="61b933e9-284a-493c-a226-0eb615b1c28a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DBMgr/crawling/crawling.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DBMgr/crawling/datas/config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DBMgr/crawling/datas/data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DBMgr/crawling/naver_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DBMgr/crawling/summarizer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DBMgr/crawling/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DBMgr/vectorMgr.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/promptMgr.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/vectorRouter/FaissVectorStore.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/vectorRouter/vectorMgr.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/packages.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/SPOT.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/SPOT.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DBMgr/FaissVectorStore.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/vectorStore/FaissVectorStore.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DBMgr/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DBMgr/connetion.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/connetion.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DBMgr/google_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/google_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DBMgr/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DBMgr/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DBMgr/naver_service.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/DBMgr/rDB.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/rDB.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DBMgr/spot_index.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DBMgr/spot_metadata.pkl" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/DBMgr/summarizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/summarizer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DBMgr/utils.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/DBMgr/vectorDB.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/vectorDB.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/bert_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crawling/google_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crawling/naver_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/gpt_service.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models_loader.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routers.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/script.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/utils.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spot_index.bin" beforeDir="false" afterPath="$PROJECT_DIR$/spot_index.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spot_metadata.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/spot_metadata.pkl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Python Script" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 2
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;JJiwonn&quot;
+  }
 }</component>
-  <component name="ProjectId" id="2mVImmjiHVIGr6GQzNeifRImMEn" />
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/SPOT-Team-Spotlight/SPOT.git&quot;,
+    &quot;accountId&quot;: &quot;5d29fe57-a236-4af8-81d3-c679a7814d47&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="2ld8ZO5UIw6mXJokBzwzJIYOziq" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.main (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.summarizer.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;hyohyo&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/shw26/Desktop/웤슾/SPOT&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "Merging hyohyo"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\201-18\Documents\GitHub\deeplearning\SPOT\app\static" />
@@ -144,26 +179,14 @@
       </set>
     </attachedChunks>
   </component>
-  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="애플리케이션 수준" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
-    <task active="true" id="Default" summary="Default task">
-      <changelist id="6377c7f6-a7c3-4ce4-a2b2-951a7b19679c" name="Changes" comment="" />
-      <created>1727155478413</created>
+    <task active="true" id="Default" summary="디폴트 작업">
+      <created>1727314797779</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1727155478413</updated>
+      <updated>1727314797779</updated>
     </task>
     <servers />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
   </component>
 </project>

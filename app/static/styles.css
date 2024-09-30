@@ -64,6 +64,47 @@ button:hover {
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
 }
 
+/* 추천 문장 카드 스타일 */
+#cardContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 10px;
+    margin-top: 20px;
+    max-width: 100%;
+    padding: 0 15px; /* 좌우 여백 추가 */
+    overflow-x: auto;
+}
+
+#cardContainer .card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 200px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#cardContainer .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+#cardContainer .icon {
+    font-size: 2.0rem;
+    margin-bottom: 15px;
+    color: #37474f; /* 아이콘 색상 추가 */
+}
+
+#cardContainer .card p {
+    color: #37474f;
+    font-size: 1.0rem;
+    font-weight: bold;
+    margin: 0;
+}
+
 #results {
     margin-top: 40px;
     padding: 20px;
@@ -153,67 +194,4 @@ a:hover {
 .logo-image {
     vertical-align: middle; /* 이미지를 텍스트 중간에 맞춤 */
     margin-right: 10px; /* 이미지와 텍스트 사이에 여백 추가 */
-}
-/* 로그인 및 회원가입 폼 */
-#loginForm, #signupForm {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    max-width: 450px;
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-#loginForm input, #signupForm input {
-    padding: 15px;
-    width: 100%;
-    margin: 10px 0;
-    border: 1px solid #b0bec5;
-    border-radius: 6px;
-    font-size: 1.1rem;
-    color: #37474f;
-}
-
-#loginToggle, #signupToggle {
-    background-color: #0288d1;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: bold;
-    margin: 5px;
-    transition: background-color 0.3s ease;
-}
-
-#loginToggle:hover, #signupToggle:hover {
-    background-color: #0277bd;
-}
-/* 로그인 상태 표시 */
-#loggedInStatus {
-    background-color: #ffffff;
-    padding: 10px;
-    border-radius: 8px;
-    margin: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-#logoutButton {
-    background-color: #ff5252;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    margin-top: 10px;
-}
-
-#logoutButton:hover {
-    background-color: #e64a19;
 }

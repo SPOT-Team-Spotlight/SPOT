@@ -3,47 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>맛집 문장 검색</title>
+    <title>SPOT</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="icon" href="/static/favicon.ico">
 </head>
 <body>
     <img src="/static/logo.png" alt="사이트 로고" width="80" height="80">
-    <h1>맛집 문장 검색</h1>
-
-    <!-- 로그인 상태 표시 및 로그아웃 -->
-    <div id="loggedInStatus" style="display: none;">
-        <p id="welcomeMessage"></p>
-        <button id="logoutButton">로그아웃</button>
-    </div>
-
-    <!-- 로그인 및 회원가입 버튼 -->
-    <div id="authButtons">
-        <button id="loginToggle">로그인</button>
-        <button id="signupToggle">회원가입</button>
-    </div>
-
-    <!-- 로그인 폼 -->
-    <form id="loginForm" style="display: none;" method="post" onsubmit="login(event)">
-        <input type="text" id="loginUsername" name="username" placeholder="아이디" required>
-        <input type="password" id="loginPassword" name="password" placeholder="비밀번호" required>
-        <button type="submit">로그인</button>
-    </form>
-
-    <!-- 회원가입 폼 -->
-    <form id="signupForm" style="display: none;" method="post" onsubmit="signup(event)">
-        <input type="text" id="signupUsername" name="username" placeholder="아이디" required>
-        <input type="password" id="signupPassword" name="password" placeholder="비밀번호" required>
-        <button type="submit">회원가입</button>
-    </form>
-
+    <h1>오늘 가고 싶은 SPOT은?</h1>
 
     <!-- 검색 폼 -->
-    <form id="searchForm" method="post" action="/search/" onsubmit="search(event)">
+    <form id="searchForm" method="POST" action="/search/">
         <input type="text" id="searchInput" name="search_input" placeholder="검색어와 지역을 입력하세요 (예: 서울 맛집)">
         <button type="submit">검색</button><br/>
-        <button type="button" id="voiceSearchButton">🎤 음성 검색</button> <!-- 음성 검색 버튼 -->
+        <button type="button" id="voiceSearchButton">🎤 음성 검색</button>
     </form>
+
+     <!-- 추천 문장 카드 -->
+     <div id="cardContainer">
+        <div class="card" onclick="autoSearch('서초동 분위기 좋은 카페')">
+            <div class="icon"></div>
+            <p>서초동 분위기 좋은 카페</p>
+        </div>
+        <div class="card" onclick="autoSearch('남자 4명이서 가는 가성비 있는 강남역 고깃집')">
+            <div class="icon"></div>
+            <p>남자 4명이서 가는 가성비 있는 강남역 고깃집</p>
+        </div>
+        <div class="card" onclick="autoSearch('부모님과 갈 만한 송파동 식당')">
+            <div class="icon"></div>
+            <p>부모님과 갈 만한 송파동 식당</p>
+        </div>
+        <div class="card" onclick="autoSearch('썸남과 갈만한 분위기 좋은 잠실 맛집')">
+            <div class="icon"></div>
+            <p>썸남과 갈만한 분위기 좋은 잠실 맛집</p>
+        </div>
+    </div>
 
     <div id="results">
         <!-- 검색 결과 영역 -->

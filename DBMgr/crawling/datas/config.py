@@ -6,3 +6,5 @@ load_dotenv()
 
 # API 키 및 자격 증명 로드
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID")
+NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET")

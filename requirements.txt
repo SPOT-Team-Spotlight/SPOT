@@ -1,7 +1,6 @@
 fastapi
 jinja2
 pydantic
-googlemaps
 openai
 transformers
 torch
@@ -12,3 +11,5 @@ faiss-cpu
 numpy
 typing_extensions
 passlib
+python-jose
+langchain-community
