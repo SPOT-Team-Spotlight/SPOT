@@ -31,3 +31,4 @@ def saveToRDB(data: SearchResult):
 
     finally:
         connection.close()
+

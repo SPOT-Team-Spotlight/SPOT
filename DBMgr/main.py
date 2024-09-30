@@ -3,6 +3,8 @@
 """
 # API 키를 환경변수로 관리하기 위한 설정 파일
 from dotenv import load_dotenv
+
+from app.gpt_service import extract_keywords
 from google_service import fetch_top_restaurants_nearby
 from vectorDB import saveToVDB, searchVDB
 from rDB import saveToRDB
@@ -43,8 +45,9 @@ def show():
 if __name__ == "__main__":
     # 서초동에 있는 맛집 데이터를 google api를 통해서 찾아오고 vdb로 저장하는 코드
     # TODO: 인터페이스 만들기
-
-    create(region="서울", keyword="횟집", naverSize=0, googleSize=100)
+    keywords = "한식" #사용자의 입력과 연결.
+    keyword = keywords[0] if isinstance(keywords, list) else keywords # 추출된 키워드의 첫번째키워드만 검색이긴한데, 이걸 음식의 종류로 추출해야함. (회, 돼지고기 이런식으로 ㅇㅇ)
+    create(region="서울", keyword=keyword, naverSize=0, googleSize=100)
 
     # 지금 테스트 중
 

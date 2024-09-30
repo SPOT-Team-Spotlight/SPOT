@@ -51,12 +51,12 @@ def saveToVDB(data : SearchResult,
         "price_level": np.array([data.price_level], dtype=np.float32),
         "serves_beer": np.array([float(data.serves_beer)], dtype=np.float32),
         "serves_wine": np.array([float(data.serves_wine)], dtype=np.float32),
-        "serves_breakfast": np.array([float(data.serves_breakfast)], dtype=np.float32),
-        "serves_brunch": np.array([float(data.serves_brunch)], dtype=np.float32),
-        "serves_lunch": np.array([float(data.serves_lunch)], dtype=np.float32),
-        "serves_dinner": np.array([float(data.serves_dinner)], dtype=np.float32),
-        "serves_vegetarian_food": np.array([float(data.serves_vegetarian_food)], dtype=np.float32),
-        "takeout": np.array([float(data.takeout)], dtype=np.float32)
+#        "serves_breakfast": np.array([float(data.serves_breakfast)], dtype=np.float32),
+#        "serves_brunch": np.array([float(data.serves_brunch)], dtype=np.float32),
+#       "serves_lunch": np.array([float(data.serves_lunch)], dtype=np.float32),
+ #       "serves_dinner": np.array([float(data.serves_dinner)], dtype=np.float32),
+  #      "serves_vegetarian_food": np.array([float(data.serves_vegetarian_food)], dtype=np.float32),
+   #     "takeout": np.array([float(data.takeout)], dtype=np.float32)
     }
     
     metadata = {

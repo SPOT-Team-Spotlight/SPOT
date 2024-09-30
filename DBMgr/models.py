@@ -28,7 +28,7 @@ class SearchResult(BaseModel):
     google_id : Optional[str] = None
     serves_beer: Optional[bool] = None
     serves_wine: Optional[bool] = None
-    serves_breakfast: Optional[bool] = None
+    #serves_breakfast: Optional[bool] = None
     serves_brunch: Optional[bool] = None
     serves_lunch: Optional[bool] = None
     serves_dinner: Optional[bool] = None

@@ -41,7 +41,8 @@ def fetch_top_restaurants_nearby(search_term: str = "검색어", region: str = "
         place_details = gmaps.place(place_id=place_id, language='ko',
                                     fields=['name', 'url', 'vicinity', 'rating',
                    'user_ratings_total', 'price_level', 'reviews', 'serves_beer',
-                   'serves_wine', 'serves_breakfast', 'serves_brunch', 'serves_lunch',
+                   'serves_wine', #'serves_breakfast',
+                                             'serves_brunch', 'serves_lunch',
                    'serves_dinner', 'serves_vegetarian_food', 'takeout'])['result']
 
 
@@ -58,7 +59,7 @@ def fetch_top_restaurants_nearby(search_term: str = "검색어", region: str = "
             reviews=place_details.get('reviews', []),
             serves_beer=place_details.get('serves_beer', None),
             serves_wine=place_details.get('serves_wine', None),
-            serves_breakfast=place_details.get('serves_breakfast', None),
+            #serves_breakfast=place_details.get('serves_breakfast', None),
             serves_brunch=place_details.get('serves_brunch', None),
             serves_lunch=place_details.get('serves_lunch', None),
             serves_dinner=place_details.get('serves_dinner', None),
@@ -90,7 +91,7 @@ def get_place_details(restaurant_name: str):
 def get_restaurant_status(restaurant_name: str) -> str:
     place_details = get_place_details(restaurant_name)
     if place_details:
-        opening_hours = place_details['result'].get('opening_hours', {})
+        opening_hours = place_details['result'].get('opening_hours', {})    #result 가 아닌, rdb에서 조회한 가게 이름이여야함ㅇㅇ
         status = opening_hours.get('open_now', '상태 불명')
         return status
     return '상태를 찾을 수 없음'

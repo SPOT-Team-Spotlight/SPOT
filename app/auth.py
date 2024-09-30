@@ -22,6 +22,8 @@ def get_db():
 
 # 회원가입 라우트
 @router.post("/signup/")
+
+
 async def signup(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
     if db_user:

@@ -1,4 +1,3 @@
-# summarizer.py
 
 import openai
 from dotenv import load_dotenv

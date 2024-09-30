@@ -44,6 +44,22 @@ def create_table(connection):
     except Exception as e:
         print(f"테이블 생성 중 오류 발생: {e}")
 
+def create_user_table(connection):
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+            CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+            """)
+            connection.commit()
+            print("유저등록 성공 ㅋ ㅅㅅ")
+    except Exception as e:
+        print(f"테이블 생성 중 오류 발생: {e}")
 
 def create_connection():
     create_spot()
@@ -58,5 +74,6 @@ def create_connection():
 
     # 테이블 생성
     create_table(connection)
-
+    #create_user_table(connection)
     return connection
+
