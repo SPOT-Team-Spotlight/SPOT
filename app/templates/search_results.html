@@ -12,19 +12,25 @@
         <h1>오늘 가고 싶은 SPOT은?</h1>
     </header>
 
-    <main>
+    <main role="main">
         <h2>"{{ search_input }}" 검색 결과</h2>
-
-        <div id="results">
-            {% for result in results %}
-            <div class="result-item">
-                <h3>{{ result.title }}</h3>
-                <p>유사도: {{ "%.2f"|format(result.similarity) }}</p>
-                <p>{{ result.summary }}</p>
+    
+        <div id="results-container">
+            <div id="results-slider">
+                {% for result in results %}
+                <div class="result-item">
+                    <h3>{{ result.title }}</h3>
+                    <p>유사도: {{ "%.2f"|format(result.similarity) }}</p>
+                    <p>{{ result.summary }}</p>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
+            <button id="prev-btn" class="slide-btn">&lt;</button>
+            <button id="next-btn" class="slide-btn">&gt;</button>
         </div>
-
+    
+        <div id="slide-indicator"></div>
+    
         <a href="/" class="button">새로운 검색하기</a>
     </main>
 

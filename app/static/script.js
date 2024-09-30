@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const loadingScreen = document.getElementById('loadingScreen');
     const resultsContainer = document.getElementById('results');
 
-
     // 검색 요청을 처리하는 함수
     searchForm.addEventListener('submit', function(event) {
         event.preventDefault();  // 기본 폼 동작 막기
@@ -72,6 +71,71 @@ document.addEventListener("DOMContentLoaded", function() {
     } else {
         voiceSearchButton.style.display = 'none';
         console.log('음성 인식이 지원되지 않는 브라우저입니다.');
+    }
+
+    
+    // 슬라이더 기능
+    const slider = document.getElementById('results-slider');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const slideIndicator = document.getElementById('slide-indicator');
+    
+    if (slider && prevBtn && nextBtn) {
+        const slides = slider.children;
+        let currentSlide = 0;
+
+        // 슬라이드 표시기 생성
+        for (let i = 0; i < slides.length; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('indicator-dot');
+            dot.addEventListener('click', () => goToSlide(i));
+            slideIndicator.appendChild(dot);
+        }
+
+        function updateSlider() {
+            slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+            
+            // 표시기 업데이트
+            const dots = slideIndicator.children;
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].classList.toggle('active', i === currentSlide);
+            }
+
+            // 버튼 상태 업데이트
+            prevBtn.style.display = currentSlide === 0 ? 'none' : 'block';
+            nextBtn.style.display = currentSlide === slides.length - 1 ? 'none' : 'block';
+        }
+
+        function goToSlide(n) {
+            currentSlide = n;
+            updateSlider();
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateSlider();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlider();
+            }
+        }
+
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+
+        // 키보드 네비게이션 추가
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // 초기 상태 설정
+        updateSlider();
     }
 });
 
