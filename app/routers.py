@@ -41,7 +41,7 @@ async def search_restaurant(request: Request, search_input: str = Form(...)):
         if embedding.shape[0] == 1:
             embedding = embedding.flatten()  # 1차원 배열로 변환
         else:
-            raise ValueError("Unexpected embedding shape")
+            raise ValueError("예상치 못한 임베딩 차원입니다.")
 
     # padding을 추가하여 차원을 맞춤
         padding = np.zeros(max(0, vector_store.dim - len(embedding)), dtype=np.float32)
