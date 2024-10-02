@@ -33,11 +33,18 @@ def saveToVDB(data: Data):
     """
     
     # 숫자로 전환 되지 않은 것들만 벡터화
-    vectorization_desc = {}
+    vectorization = {
+        "title": get_openai_embedding(data.title),  # 제목 임베딩
+        "service_list": get_openai_embedding(' '.join([f"{k}: {v}" for k, v in data.service_list.items()])),
+        # 서비스 리스트 임베딩
+        "reviews": get_openai_embedding(' '.join(data.reviews)),  # 리뷰 임베딩
+        "price_level": get_openai_embedding(data.price_level),  # 가격대 임베딩
+        "naver_description": get_openai_embedding(data.naver_description)  # 네이버 블로그 설명 임베딩
+    }
     for i, des in enumerate(data.desc):
         # Document 객체에서 텍스트 내용을 추출
         text_content = des.page_content if isinstance(des, Document) else str(des)
-        vectorization_desc[i] = get_openai_embedding(text_content)  # 인덱스를 키로 사용
+        vectorization = get_openai_embedding(text_content)  # 인덱스를 키로 사용
     
     metadata = {
         "title": data.title,
@@ -47,7 +54,7 @@ def saveToVDB(data: Data):
     }
 
     # 벡터와 메타데이터를 함께 저장
-    vector_store.add_to_index(vectorization_desc, metadata)
+    vector_store.add_to_index(vectorization, metadata)
     vector_store.save_index()
 
 def searchVDB(query : str = "검색할 문장",

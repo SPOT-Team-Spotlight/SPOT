@@ -1,15 +1,20 @@
-class Data():
-    title : str
-    desc : list
-    summary : str = "생성되지 않음"
-    link : str
+class Data:
+    title: str
+    service_list: dict  # 맥주, 와인, 주류 유무 등
+    reviews: list  # 리뷰 정보
+    price_level: str  # 가격대 정보
+    naver_description: str  # 네이버 블로그 설명
+    summary: str = "생성되지 않음"
+    link: str
 
-    def __init__(self, title, chunked_desc, summary, link) -> None:
+    def __init__(self, title, service_list, reviews, price_level, naver_description, summary, link) -> None:
         self.title = title
-        self.desc = chunked_desc
+        self.service_list = service_list
+        self.reviews = reviews
+        self.price_level = price_level
+        self.naver_description = naver_description
         self.summary = summary
         self.link = link
 
     def print_data(self):
-        return "Data { title:" + self.title + "desc:" + str(self.desc[0]) + \
-            "summary:" + str(self.summary[0]) + "link:" + str(self.link) + " }"
+        return f"Data {{ title: {self.title}, service_list: {self.service_list}, reviews: {self.reviews}, price_level: {self.price_level}, naver_description: {self.naver_description}, summary: {self.summary}, link: {self.link} }}"

@@ -44,16 +44,22 @@ def fetch_top_restaurants_nearby(query: str = "검색어", region: str = "지역
             f"맥주 제공: {'예' if place_details.get('serves_beer') else '아니요'}",
             f"와인 제공: {'예' if place_details.get('serves_wine') else '아니요'}"
         ]
+        service_list = {
+            "맥주 제공": place_details.get('serves_beer', False),
+            "와인 제공": place_details.get('serves_wine', False),
+            "아침 제공": place_details.get('serves_breakfast', False),
+            "점심 제공": place_details.get('serves_lunch', False),
+            "저녁 제공": place_details.get('serves_dinner', False)
+        }
 
+        # 가격대
+        price_level = place_details.get('price_level', '가격 정보 없음')
+        reviews = [review.get('text', '리뷰 내용 없음') for review in place_details.get('reviews', [])]
+        print("구글검색결과:"+str(results))
         # 네이버 블로그에서 해당 식당 이름으로 검색한 데이터 가져오기
         naver_description = crawling_naver_blog_data(query=place_details.get('name', ''), region=region)
         description_list.append(f"네이버 블로그 설명: {naver_description}")
-        
-        # 리뷰가 있으면 추가
-        reviews = place_details.get('reviews', [])
-        if reviews:
-            review_texts = [review.get('text', '리뷰 내용 없음') for review in reviews]
-            description_list.append(f"리뷰: {' '.join(review_texts)}")
+        print("naver검색 결과:"+str(naver_description))
 
         # 최종 요약 생성
         summary = do_summarize(name=place_details.get('name', '이름 없음'), descs=description_list)
@@ -61,7 +67,10 @@ def fetch_top_restaurants_nearby(query: str = "검색어", region: str = "지역
         # Data 객체 생성 및 결과 리스트에 추가
         results.append(Data(
             title=place_details.get('name', '이름 없음'),
-            chunked_desc=description_list,  # 결합된 description_list를 chunked_desc에 저장
+            service_list=service_list,
+            reviews=reviews,
+            price_level=price_level,
+            naver_description=naver_description,
             summary=summary,
             link=place_details.get('url', 'URL 없음')
         ))
