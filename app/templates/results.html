@@ -35,5 +35,13 @@
     </main>
 
     <script src="/static/js/results.js"></script> <!-- JS 파일 연결 -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const spinner = document.getElementById('spinner');
+            if (spinner) {
+                spinner.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
