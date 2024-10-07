@@ -22,7 +22,10 @@
                 <div class="slider-item">
                     <h3>{{ result.title }}</h3>
                     <p>유사도: {{ "%.2f"|format(result.similarity) }}</p>
-                    <p>{{ result.summary }}</p>
+                    <p>정보: {{ result.service_list }}</p>
+                    <p>요약: {{ result.summary }}</p>
+                    <p>리뷰: {{ result.reviews }}</p>
+                    <p>네이버: {{ result.naver_description }}</p>
                     <p><a href="{{ result.link }}" target="_blank">링크로 이동</a></p>
                 </div>
                 {% endfor %}

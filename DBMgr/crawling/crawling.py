@@ -45,8 +45,9 @@ def make_datas(datas: list) -> list:
             reviews=chunked_reviews,
             price_level=d.price_level,
             naver_description=chunked_naver_description,
-            summary=do_summarize(name=clean_title, descs=chunked_naver_description),
-            link=d.link
+            summary=do_summarize(name=clean_title, descs=chunked_naver_description, reviews=clean_reviews),
+            link=d.link,
+            types=d.types
         ))
-
+        print("data:",Data)
     return result

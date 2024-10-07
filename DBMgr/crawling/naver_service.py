@@ -56,3 +56,18 @@ def crawling_naver_blog_data(query: str = "검색할 단어",
     except requests.exceptions.RequestException as e:
         print(f"Naver API 요청 실패: {str(e)}")
         return "네이버 블로그 설명 오류"
+    def naver_location_search(query: str = "구글서치로 나온 식당 이름") :
+        base_url = "https://openapi.naver.com/v1/search/local.json"
+        headers = {
+            "X-Naver-Client-Id": NAVER_CLIENT_ID,
+            "X-Naver-Client-Secret": NAVER_CLIENT_SECRET
+        }
+        url = f"{base_url}?query={query}display=10&start=1&sort=random"
+
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+
+        items = response.json().get("items", [])
+        if items:
+            category = items[0].get('category'.'카테고리 없어')
+            description = items[0].get('description')

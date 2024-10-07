@@ -7,7 +7,7 @@ from openai import OpenAI
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # 프롬프트
-def summarize_desc(name: str, desc):
+def summarize_desc(name: str, naver_description, reviews):
     """
     가게 이름과 설명을 바탕으로 OpenAI를 통해 요약된 정보를 반환하는 함수.
     중복된 정보 없이 새로운 정보를 생성하는 것을 목표로 함.
@@ -16,15 +16,10 @@ def summarize_desc(name: str, desc):
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "당신은 맛집 전문가입니다. 사용자가 입력한 검색어에 대한 유익한 요약을 제공하는 것이 목표입니다."},
-                {"role": "user", "content": f"""가게 이름: {name}\n
-                가게 설명: {desc}\n
-                1. 가게의 인기 메뉴(대표 메뉴)를 우선적으로 포함하세요.
-                2. 가게의 위치(도시나 동네)를 짧게 요약하세요.
-                3. 가게의 분위기(로맨틱한, 가족 친화적인, 캐주얼한 등)를 간결하게 설명하세요.
-                4. 해당 가게와 관련된 중복된 정보는 제공하지 말고 새로운 내용을 만들어 주세요.
-                5. 요약은 200자 이내로 하세요.
-                6. 요약할 수 없는 정보는 생략하세요."""}
+                {"role": "system", "content": "아래의 맛집 정보를 요약해서 가게의 특징을 잘 알수있게해. 너무 길게는 하지말고, 그냥 적당히200자 내외로, 중복된 정보 없게요약해."},
+                {"role": "user", "content": f"""가게 이름: {name}
+                가게 설명: {naver_description}
+                가게 리뷰: {reviews}"""}
             ],
             temperature=0.7,
             max_tokens=200,
@@ -34,7 +29,7 @@ def summarize_desc(name: str, desc):
         )
         result = response.choices[0].message.content
         print("요약결과"+result)
-        print("desc"+desc)
+        print("desc"+naver_description)
         return result
 
     except Exception as e:
