@@ -19,8 +19,9 @@ def filter_by_region(items: List[dict], region: str) -> List[dict]:
 
     return filtered_items
 
+
 def crawling_naver_blog_data(query: str = "검색할 단어",
-                          region: str = "지역") -> list:
+                             region: str = "지역") -> list:
     """
     네이버 블로그 데이터 최대한 많이 (최대100개) 가져오기
     """
@@ -56,18 +57,27 @@ def crawling_naver_blog_data(query: str = "검색할 단어",
     except requests.exceptions.RequestException as e:
         print(f"Naver API 요청 실패: {str(e)}")
         return "네이버 블로그 설명 오류"
-    def naver_location_search(query: str = "구글서치로 나온 식당 이름") :
+
+def naver_location_search(query: str = "구글서치로 나온 식당 이름", region: str ="위치") -> str:  # 음식카테고리 가져오는 코드
         base_url = "https://openapi.naver.com/v1/search/local.json"
         headers = {
-            "X-Naver-Client-Id": NAVER_CLIENT_ID,
-            "X-Naver-Client-Secret": NAVER_CLIENT_SECRET
+            "X-Naver-Client-Id": NAVER_CLIENT_ID,  # 네이버 API Client ID
+            "X-Naver-Client-Secret": NAVER_CLIENT_SECRET  # 네이버 API Client Secret
         }
-        url = f"{base_url}?query={query}display=10&start=1&sort=random"
+        start = 1
+        display = 10
+        sort = "sim"
 
+        url = f"{base_url}?query={query}&display={display}&start={start}&sort={sort}"
+
+        # 네이버 지역 검색 API 요청
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
         items = response.json().get("items", [])
         if items:
-            category = items[0].get('category'.'카테고리 없어')
-            description = items[0].get('description')
+            # 첫 번째 값만 전달 두개전달해도되긴함.
+            category = items[0].get('category', '카테고리 없음')
+            return category
+        else:
+            return '카테고리 못찾음'

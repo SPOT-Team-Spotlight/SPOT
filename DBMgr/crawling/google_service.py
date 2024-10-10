@@ -4,7 +4,7 @@ import googlemaps
 from typing import List
 from .datas.config import GOOGLE_API_KEY
 from .datas.data import Data
-from .naver_service import crawling_naver_blog_data
+from .naver_service import crawling_naver_blog_data,naver_location_search
 from .summarizer import do_summarize
 # Google Maps 클라이언트 초기화
 gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
@@ -69,9 +69,11 @@ def fetch_top_restaurants_nearby(query: str = "검색어", region: str = "지역
 
             # 네이버 블로그에서 해당 식당 이름으로 검색한 데이터 가져오기
             naver_description = crawling_naver_blog_data(query=place_details.get('name', ''), region=region)
+            naver_category = naver_location_search(query=place_details.get('name','')) # 수정하기
             description_list.append(f"네이버 블로그 설명: {naver_description}")
             print("구글검색결과:" + str(results))
             print("naver검색 결과:" + str(naver_description))
+            print("네이버지역 결과:" + str(naver_category))
             # ttt = place_details.get('types', None)
             # print("types:",ttt)
             # 최종 요약 생성1
@@ -87,7 +89,8 @@ def fetch_top_restaurants_nearby(query: str = "검색어", region: str = "지역
                 naver_description=naver_description,
                 summary=summary,
                 link=place_details.get('url', 'URL 없음'),
-                types=place.get('types','장소분류 없음') #장소 분류 추가해1야함
+                types=place.get('types','장소분류 없음'), #장소 분류 추가해1야함
+                category=naver_category
             ))
 
             total_fetched += 1

@@ -3,7 +3,7 @@
 """
 # API 키를 환경변수로 관리하기 위한 설정 파일
 from dotenv import load_dotenv
-from vectorMgr import saveToVDB, searchVDB
+from vectorMgr import saveToVDB, searchVDB, view_vdb_data
 from crawling.crawling import start_crawling, make_datas
 from logger import vdb_logging
 
@@ -70,15 +70,21 @@ if __name__ == "__main__":
             
             print(f"검색된 결과 {len(result)}개 입니다.")
             count = 1
-          #  print(count, ":", result[0])2
-
-
+            print(count, ":", result[0])
             more = input("더보기 y, 그만 보기 n : ")
 
             if(more == 'y'):
                 for i in range(1, len(result)):
                     count +=1
                     print(count, ":", result[i])
+
+
+        elif user_input =='3':
+            print("db확인")
+            print(view_vdb_data())
+
+            more = input("더보기 y, 그만 보기 n : ")
+
         elif user_input == '0':
             print("종료합니다")
 

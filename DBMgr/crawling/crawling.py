@@ -47,7 +47,8 @@ def make_datas(datas: list) -> list:
             naver_description=chunked_naver_description,
             summary=do_summarize(name=clean_title, descs=chunked_naver_description, reviews=clean_reviews),
             link=d.link,
-            types=d.types
+            types=d.types,
+            category=d.category# 수정
         ))
         print("data:",Data)
     return result

@@ -5,19 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="61b933e9-284a-493c-a226-0eb615b1c28a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DBMgr/crawling/location_search.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DBMgr/crawling/crawling.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/crawling/crawling.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DBMgr/crawling/datas/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/crawling/datas/data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DBMgr/crawling/google_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/crawling/google_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DBMgr/crawling/naver_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/crawling/naver_service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DBMgr/crawling/summarizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/crawling/summarizer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DBMgr/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/logger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DBMgr/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DBMgr/spot_index.bin" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/spot_index.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DBMgr/spot_metadata.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/spot_metadata.pkl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DBMgr/vectorMgr.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/vectorMgr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/results.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/results.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/vectorRouter/promptMgr.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/vectorRouter/promptMgr.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/vectorRouter/vectorMgr.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/vectorRouter/vectorMgr.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DBMgr/vectorStore/FaissVectorStore.py" beforeDir="false" afterPath="$PROJECT_DIR$/DBMgr/vectorStore/FaissVectorStore.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/log_number.txt" beforeDir="false" afterPath="$PROJECT_DIR$/log_number.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vdbLog.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vdbLog.txt" beforeDir="false" afterPath="$PROJECT_DIR$/vdbLog.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,15 +57,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.main (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;hyohyohyo&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main (1).executor": "Run",
+    "Python.main.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "hyohyohyo",
+    "last_opened_file_path": "C:/Users/shw26/Desktop/웤슾/SPOT"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\shw26\Desktop\웤슾\SPOT" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\shw26\Desktop\웤슾\SPOT" />
       <recent name="C:\Users\shw26\Desktop\웤슾\SPOT\venv" />
