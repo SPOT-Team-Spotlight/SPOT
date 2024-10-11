@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 
 # 로그 번호를 저장할 파일 경로
-log_number_file = '../log_number.txt'
+log_number_file = 'log_number.txt'
 
 # 마지막 로그 번호를 저장하는 함수
 def save_log_number(number):
@@ -27,7 +27,7 @@ def write_log(region, keyword, start_count, save_count):
 
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     # TXT 파일 열기 (쓰기 모드)
-    with open('../vdbLog.txt', 'a', encoding='utf-8') as file:
+    with open('vdbLog.txt', 'a', encoding='utf-8') as file:
         for key, value in data.items():
             file.write(f'{key}: {value}\n')
         else:
@@ -38,6 +38,9 @@ def write_log(region, keyword, start_count, save_count):
     return save_count
 
 def vdb_logging(region, keyword, count):
+    """
+    크롤링을 한 결과를 저장하는 함수
+    """
     log_number = load_log_number()
     count = write_log(region, keyword, log_number, count)
     log_number += count

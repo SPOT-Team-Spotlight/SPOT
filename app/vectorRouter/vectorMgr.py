@@ -18,7 +18,7 @@ embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key, model="text-embeddi
 vector_store = FaissVectorStore()
 
 # BM25 모델 초기화 (vector_store에 있는 문서들의 텍스트 사용)
-corpus = [meta.get("naver_description", " ") for meta in vector_store.metadata]
+corpus = [meta.get("summary", " ") for meta in vector_store.metadata]
 
 if not corpus:
     raise EmptyVectorStoreException("메타 데이터 안에 desc가 없습니다")
@@ -51,7 +51,6 @@ def search(search_input: str, k: int = 5):
     tokenized_query = search_input.split(" ")
     bm25_scores = bm25.get_scores(tokenized_query)  # BM25 점수 계산
     top_bm25_indices = np.argsort(bm25_scores)[-10:]  # 상위 10개의 문서 인덱스 선택
-
 
     if len(top_bm25_indices) == 0:
         raise NoSearchResultsException()
@@ -90,13 +89,11 @@ def search(search_input: str, k: int = 5):
     for idx, i in enumerate(final_ranked_indices):
         if i < len(vector_store.metadata):
             meta = vector_store.metadata[i]
-            summary = summarize_desc(meta.get("title", "Unknown"), meta.get("summary", ""), meta.get("reviews",""))
+            summary = summarize_desc(meta.get("title", "Unknown"), meta.get("summary", ""))
             results.append({
                 "title": meta.get("title", "Unknown"),
                 "similarity": float(D[0][idx]),
                 "summary": summary,
-                "reviews":meta.get("reviews"),
-                "service_list":meta.get("service_list"),
                 "link": meta.get("link", "https://none")
             })
 

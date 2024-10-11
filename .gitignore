@@ -1,3 +1,11 @@
-../../../Downloads/SPOT-develop (1)/SPOT-develop/.env
+.env
 *.pyc
 __pycache__/
+build/good_main/PYZ-00.toc
+build/good_main/PYZ-00.pyz
+build/good_main/PKG-00.toc
+build/good_main/good_main.pkg
+*.toc
+*.pyc
+*.pyc
+app/__pycache__/routers.cpython-310.pyc

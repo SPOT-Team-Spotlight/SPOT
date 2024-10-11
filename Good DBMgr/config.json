@@ -1,0 +1,73 @@
+{
+    "width": 600,
+    "height": 400,
+    "x": 100,
+    "y": 100,
+    "font_family": "Arial",
+    "font_size": 10,
+    "theme": "arc",
+    "button_style": "default",
+    "vdb_creator": {
+        "width": 600,
+        "height": 500,
+        "x": 776,
+        "y": 125,
+        "crawling": {
+            "region": "서초동",
+            "keyword": "짜장면",
+            "mode": "테스트 모드(20)",
+            "recent_regions": [
+                "서초동"
+            ],
+            "recent_keywords": [
+                "짜장면"
+            ]
+        },
+        "preprocessing": {
+            "embedding_model_type": "OpenAI",
+            "embedding_model_version": "text-embedding-3-small",
+            "chunk_size": "100",
+            "overlap": "20"
+        }
+    },
+    "vdb_selector": {
+        "width": 400,
+        "height": 300,
+        "x": 200,
+        "y": 200
+    },
+    "vdb_retriever": {
+        "width": 552,
+        "height": 300,
+        "x": 927,
+        "y": 136
+    },
+    "vdb_merge": {
+        "width": 656,
+        "height": 300,
+        "x": 754,
+        "y": 108
+    },
+    "api_key": {
+        "width": 500,
+        "height": 400,
+        "x": 300,
+        "y": 300
+    },
+    "settings": {
+        "font_family": "Arial",
+        "font_size": 12,
+        "theme": "scidblue",
+        "button_style": "default",
+        "width": 282,
+        "height": 227,
+        "x": 1212,
+        "y": 140
+    },
+    "application": {
+        "width": 600,
+        "height": 480,
+        "x": 52,
+        "y": 52
+    }
+}

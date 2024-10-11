@@ -26,45 +26,29 @@ def get_openai_embedding(text):
     embedding = embeddings.embed_query(text)
     return np.array(embedding, dtype=np.float32)
 
-
 def saveToVDB(data: Data):
     """
     data로 받은 객체를 VectorDB에 저장하는 함수
+    :param data: 저장할 객체
     """
-    # 가중치를 적용하는 필드 (임베딩 * weights[""])으로 적용
-    weights = {
-        "location": 3.0,
-        "type": 3.0,
-        "menu": 3.0,
-        "other": 1.0
-    }
-    # 필드별로 텍스트를 임베딩
-    vectorization = {
-        "service_list": get_openai_embedding(' '.join([f"{k}: {v}" for k, v in data.service_list.items()])),
-        # 서비스 리스트 임베딩
-        "reviews": get_openai_embedding(' '.join([r.page_content for r in data.reviews])),  # 리뷰 임베딩
-        "price_level": get_openai_embedding(str(data.price_level)),  # 가격대 임베딩 (문자열로 변환)
-        "naver_description": get_openai_embedding(' '.join([d.page_content for d in data.naver_description])),
-        # 네이버 블로그 설명 임베딩
-        "naver_category": get_openai_embedding(str(data.category)) * weights["menu"]
-
-    }
-    print(f"Processing text: {str(data.category)}")
-    # 메타데이터 저장
+    
+    # 숫자로 전환 되지 않은 것들만 벡터화
+    vectorization_desc = {}
+    for i, des in enumerate(data.desc):
+        # Document 객체에서 텍스트 내용을 추출
+        text_content = des.page_content if isinstance(des, Document) else str(des)
+        vectorization_desc[i] = get_openai_embedding(text_content)  # 인덱스를 키로 사용
+    
     metadata = {
         "title": data.title,
-        "service_list": data.service_list,
-        "reviews": [r.page_content for r in data.reviews],  # 리뷰의 텍스트
-        "price_level": str(data.price_level),  # 가격대 문자열로 변환하여 저장
-        "naver_description": ' '.join([d.page_content for d in data.naver_description]),  # 네이버 블로그 설명 텍스트
+        "desc": [d.page_content if isinstance(d, Document) else str(d) for d in data.desc],
         "summary": data.summary,
         "link": data.link
     }
 
     # 벡터와 메타데이터를 함께 저장
-    vector_store.add_to_index(vectorization, metadata)
+    vector_store.add_to_index(vectorization_desc, metadata)
     vector_store.save_index()
-
 
 def searchVDB(query : str = "검색할 문장",
               search_amount : int = 5): 
@@ -85,14 +69,12 @@ def searchVDB(query : str = "검색할 문장",
     results = []
 
     for idx, i in enumerate(I[0]):
-
         if i < len(vector_store.metadata):
             meta = vector_store.metadata[i]
             results.append({
                 "title": meta.get("title", "Unknown"),
                 "similarity": float(D[0][idx]),
-                "reviews": meta.get("reviews","Unknown"),
-                "service_list": meta.get("service_list", "Unknown"),
+                "chunked_desc": meta.get("desc", "Unknown"),
                 "summary": meta.get("summary", "Unknown"),
                 "link":meta.get("link","https://none")
             })
@@ -100,22 +82,3 @@ def searchVDB(query : str = "검색할 문장",
     # 유사도 순으로 정렬
     results.sort(key=lambda x: x["similarity"])
     return results
-
-def view_vdb_data():
-    """
-    VDB에 저장된 모든 데이터를 확인하는 함수
-    """
-    if len(vector_store.metadata) == 0:
-        print("경고: VDB가 비어 있습니다.")
-        return
-
-    for idx, meta in enumerate(vector_store.metadata):
-        print(f"Data {idx + 1}:")
-        print(f"Title: {meta.get('title', 'Unknown')}")
-        print(f"Service List: {meta.get('service_list', 'Unknown')}")
-        print(f"Reviews: {meta.get('reviews', 'Unknown')}")
-        print(f"Price Level: {meta.get('price_level', 'Unknown')}")
-        print(f"Naver Description: {meta.get('naver_description', 'Unknown')}")
-        print(f"Summary: {meta.get('summary', 'Unknown')}")
-        print(f"Link: {meta.get('link', 'https://none')}")
-        print("\n---\n")
