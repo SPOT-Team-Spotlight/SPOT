@@ -111,7 +111,8 @@ class VdbSaveModule:
                 base_meta = {
                     "data_id": data_id,
                     "name": data.name,
-                    "address": data.address
+                    "address": data.address,
+                    "photo_url": data.photo_url
                 }
                 
                 # Google 데이터 처리

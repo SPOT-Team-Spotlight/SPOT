@@ -8,26 +8,27 @@
     "theme": "arc",
     "button_style": "default",
     "vdb_creator": {
-        "width": 600,
-        "height": 500,
-        "x": 776,
-        "y": 125,
+        "width": 826,
+        "height": 659,
+        "x": 356,
+        "y": 57,
         "crawling": {
-            "region": "서초동",
-            "keyword": "짜장면",
+            "region": "강남역",
+            "keyword": "맥주집",
             "mode": "테스트 모드(20)",
             "recent_regions": [
-                "서초동"
+                "강남역"
             ],
             "recent_keywords": [
-                "짜장면"
+                "맥주집",
+                "피자집"
             ]
         },
         "preprocessing": {
             "embedding_model_type": "OpenAI",
             "embedding_model_version": "text-embedding-3-small",
-            "chunk_size": "100",
-            "overlap": "20"
+            "chunk_size": "150",
+            "overlap": "30"
         }
     },
     "vdb_selector": {
@@ -38,9 +39,9 @@
     },
     "vdb_retriever": {
         "width": 552,
-        "height": 300,
-        "x": 927,
-        "y": 136
+        "height": 532,
+        "x": 786,
+        "y": 142
     },
     "vdb_merge": {
         "width": 656,
@@ -66,8 +67,8 @@
     },
     "application": {
         "width": 600,
-        "height": 480,
-        "x": 52,
-        "y": 52
+        "height": 540,
+        "x": 182,
+        "y": 182
     }
 }

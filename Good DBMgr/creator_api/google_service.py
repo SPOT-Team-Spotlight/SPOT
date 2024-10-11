@@ -40,11 +40,17 @@ class GoogleService():
                 name = place_details.get('name', '이름 없음')
                 address = place_details.get('vicinity', '주소 없음')
                 google_json = place_details
+                photo_url = None
+                
+                if 'photos' in place_details and place_details['photos']:
+                    photo_reference = place_details['photos'][0]['photo_reference']
+                    photo_url = self.get_photo_url(photo_reference)
+                
 
                 # 네이버 블로그에서 해당 식당 이름으로 검색한 데이터 가져오기
                 blog_datas = NaverService().crawling_naver_blog_data(query=name, region=region)
 
-                results.append(Data(name, address, google_json, blog_datas))
+                results.append(Data(name, address, google_json, blog_datas,photo_url))
             
             if self.mode == TEST_MODE:
                 break  # TEST_MODE에서는 첫 페이지만 크롤링
@@ -54,3 +60,11 @@ class GoogleService():
                 break  # GATHER_MODE에서는 최대 3페이지까지 크롤링 (약 60개 결과)
 
         return results
+    def get_photo_url(self, photo_reference: str, max_width: int = 400) -> str:
+        """
+        Google Places API를 사용해 photo_reference로부터 사진 URL을 얻습니다.
+        :param photo_reference: 사진 참조값
+        :param max_width: 사진의 최대 너비 (픽셀)
+        :return: 사진 URL
+        """
+        return f"https://maps.googleapis.com/maps/api/place/photo?maxwidth={max_width}&photoreference={photo_reference}&key={get_key('GOOGLE_API_KEY')}"
