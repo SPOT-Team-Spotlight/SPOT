@@ -48,7 +48,7 @@ class GoogleService():
                 
 
                 # 네이버 블로그에서 해당 식당 이름으로 검색한 데이터 가져오기
-                blog_datas = NaverService().crawling_naver_blog_data(query=name, region=region)
+                blog_datas = NaverService().crawling_naver_blog_data(query=name, region=region, name=name)
 
                 results.append(Data(name, address, google_json, blog_datas,photo_url))
             

@@ -14,12 +14,13 @@
         "y": 57,
         "crawling": {
             "region": "강남역",
-            "keyword": "맥주집",
+            "keyword": "분식집",
             "mode": "테스트 모드(20)",
             "recent_regions": [
                 "강남역"
             ],
             "recent_keywords": [
+                "분식집",
                 "맥주집",
                 "피자집"
             ]
@@ -67,8 +68,8 @@
     },
     "application": {
         "width": 600,
-        "height": 540,
-        "x": 182,
-        "y": 182
+        "height": 720,
+        "x": 52,
+        "y": 52
     }
 }

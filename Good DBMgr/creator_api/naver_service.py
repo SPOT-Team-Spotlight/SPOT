@@ -40,7 +40,9 @@ class NaverService():
             blogs = list()
             for item in items:
                 link = item.get('link')
-                blog=self.make_naver_data(blog_url=link)
+                blog= self.make_naver_data(blog_url=link, region=region, query=query)
+               
+                
 
                 if blog is not None:
                     blogs.append(blog)
@@ -51,7 +53,7 @@ class NaverService():
             print(f"Naver API 요청 실패: {str(e)}")
             return "네이버 블로그 설명 오류"
         
-    def make_naver_data(self, blog_url : str) -> NaverData: 
+    def make_naver_data(self, blog_url: str, region: str, query: str) -> NaverData: 
         """
         추출이 안되면 None 반환
         """
@@ -70,22 +72,26 @@ class NaverService():
         naver_blog_url = 'https://blog.naver.com/'
 
         # iframe이 가리키는 URL에 대해 별도로 요청
-        if iframe_src != None:
+        if iframe_src:
             iframe_response_url = naver_blog_url + iframe_src
-            iframe_response = requests.get(iframe_response_url)
-            iframe_soup = BeautifulSoup(iframe_response.text, 'html.parser')
+        iframe_response = requests.get(iframe_response_url)
+        iframe_soup = BeautifulSoup(iframe_response.text, 'html.parser')
+
+        # class="se-main-container"를 가진 <div> 태그 찾기
+        div_container = iframe_soup.find('div', class_='se-main-container')
+        refined_content = str()
+        if div_container:
+            refined_content = div_container.get_text(separator=' ', strip=True)
+
+            # 검증: 블로그 내용에 기대한 이름(expected_name)이 포함되어 있는지 확인"
             
-            # class="se-main-container"를 가진 <div> 태그 찾기
-            div_container = iframe_soup.find('div', class_='se-main-container')
-            refined_content = str()
-            if div_container:
-                refined_content = div_container.text.replace('\n', ' ')
+            if query in refined_content:
+                print(f"'{query}'가 포함된 블로그가 검증되었습니다: {blog_url}")
+                return NaverData(content=refined_content, link=blog_url)
+            else:
+                print(f"'{region}' 또는 '{query}'가 블로그 내용에 포함되지 않아 제외되었습니다: {blog_url}")
 
-            data = NaverData(content=refined_content, link=blog_url)
-            return data
-        
-        return None
-
-
+    # 검증을 통과하지 못한 경우 None 반환
+            return None
     
     
