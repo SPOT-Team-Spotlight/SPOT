@@ -47,7 +47,7 @@ def preprocess_search_input(search_input: str):
     return keywords
 
 # RAG(검색 + 생성) 기반 검색 함수
-def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.6, faiss_weight: float = 0.4):
+#def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.6, faiss_weight: float = 0.4):
     if not search_input:
         raise EmptySearchQueryException()
 
@@ -172,6 +172,115 @@ def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.6, fai
             "data_id": data_id,
             "link": link
         })
+
+    return {
+        "generated_response": "검색 결과 요약 생성 완료",
+        "results": selected_results
+    }
+# ... (이전 코드와 동일)
+
+def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.6, faiss_weight: float = 0.4):
+    if not search_input:
+        raise EmptySearchQueryException()
+
+    # 1. 검색어 전처리
+    keywords = preprocess_search_input(search_input)
+
+    # 2. BM25 검색
+    bm25_scores = np.zeros(len(corpus))
+    for keyword in keywords:
+        tokenized_query = keyword.split(" ")
+        keyword_scores = bm25.get_scores(tokenized_query)
+        bm25_scores += keyword_scores
+
+    # BM25 점수 정규화
+    if np.max(bm25_scores) > 0:
+        bm25_scores = bm25_scores / np.max(bm25_scores)
+
+    # 상위 BM25 인덱스 선택
+    top_bm25_indices = np.argsort(bm25_scores)[-200:]
+    print(f"BM25 후보 개수: {len(top_bm25_indices)}")
+
+    if len(top_bm25_indices) == 0:
+        raise NoSearchResultsException()
+
+    # 3. FAISS 검색
+    embedding = get_openai_embedding(search_input)
+
+    if vector_store.dim is None:
+        raise EmptyVectorStoreException()
+
+    # FAISS 검색 수행
+    D, I = vector_store.search(embedding.reshape(1, -1), k=200)
+    print(f"FAISS 후보 개수: {len(I[0])}")
+
+    # FAISS 유사도 정규화
+    faiss_similarities = 1 - D[0]
+    if np.max(faiss_similarities) > 0:
+        faiss_similarities = faiss_similarities / np.max(faiss_similarities)
+
+    # 4. BM25와 FAISS 점수 결합
+    combined_scores = {}
+
+    for idx in top_bm25_indices:
+        combined_scores[idx] = bm25_scores[idx] * bm25_weight
+
+    for idx, doc_id in enumerate(I[0]):
+        if doc_id in combined_scores:
+            combined_scores[doc_id] += faiss_similarities[idx] * faiss_weight
+        else:
+            combined_scores[doc_id] = faiss_similarities[idx] * faiss_weight
+
+    # 5. 결합된 점수로 상위 문서 선택 및 정렬
+    ranked_indices = sorted(combined_scores, key=combined_scores.get, reverse=True)
+    print(f"결합된 후보 개수: {len(ranked_indices)}")
+
+    # 6. 중복된 이름 제거 및 상위 k개의 맛집 선택
+    seen_names = set()
+    selected_results = []
+    for idx in ranked_indices:
+        if idx < len(vector_store.metadata):
+            meta = vector_store.metadata[idx]
+            name = meta.get("name", "Unknown")
+
+            # 중복된 이름 체크
+            if name in seen_names:
+                continue
+            seen_names.add(name)
+
+            data_id = meta.get("data_id")
+            address = meta.get("address", "Unknown")
+            link = meta.get("link", "")
+
+            # 해당 data_id로 그룹화된 모든 유효한 chunk_content를 수집
+            chunks = []
+            for m in vector_store.metadata:
+                if m.get("data_id") == data_id:
+                    chunk_content = m.get("chunk_content", "")
+                    if chunk_content:
+                        chunks.append(chunk_content)
+
+            full_content = " ".join(chunks)
+
+            # 요약 생성
+            summary = generate_gpt_response(name, full_content)
+
+            selected_results.append({
+                "name": name,
+                "summary": summary,
+                "address": address,
+                "data_id": data_id,
+                "link": link
+            })
+
+            # 상위 k개의 결과만 선택
+            if len(selected_results) >= k:
+                break
+
+    print(f"선택된 결과 수: {len(selected_results)}")
+
+    if len(selected_results) < k:
+        print("경고: 검색 결과가 충분하지 않습니다. 데이터 양을 확인하세요.")
 
     return {
         "generated_response": "검색 결과 요약 생성 완료",
