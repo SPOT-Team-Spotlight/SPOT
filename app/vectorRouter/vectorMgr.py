@@ -1,4 +1,3 @@
-# vectorMgr.py
 import re
 from dotenv import load_dotenv
 from langchain_community.embeddings import OpenAIEmbeddings
@@ -12,6 +11,9 @@ import logging
 import asyncio
 from app.vectorRouter.FaissVectorStore import FaissVectorStore
 from app.vectorRouter.promptMgr import generate_gpt_response  # 요약 생성 함수 가져오기
+from transformers import AutoTokenizer, AutoModelForTokenClassification
+from transformers import pipeline
+import torch
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -37,15 +39,34 @@ if not corpus:
 tokenized_corpus = [doc.split(" ") for doc in corpus]
 bm25 = BM25Okapi(tokenized_corpus)
 
+# NER 모델 로드
+ner_model_name = "klue/bert-base"  # NER 모델 사용
+ner_tokenizer = AutoTokenizer.from_pretrained(ner_model_name)
+try:
+    ner_model = AutoModelForTokenClassification.from_pretrained(ner_model_name)
+except EnvironmentError:
+    raise EnvironmentError("모델 'klue/bert-base'을 로드할 수 없습니다. 모델이 존재하는지 확인하거나, 올바른 토큰을 제공하세요.")
+ner_pipeline = pipeline("ner", model=ner_model, tokenizer=ner_tokenizer, framework="pt", device=0 if torch.cuda.is_available() else -1)
+
 # OpenAI 임베딩을 생성하는 함수
 def get_openai_embedding(text: str):
     embedding = embeddings.embed_query(text)
     return np.array(embedding, dtype=np.float32)
 
-# 검색어를 전처리하는 함수
+# 검색어를 전처리하고 NER 수행하는 함수
 def preprocess_search_input(search_input: str):
+    # 기본 전처리 (키워드 추출)
     keywords = re.findall(r'\b\w+\b', search_input)
     keywords = [word for word in keywords if len(word) > 1]
+
+    # NER 수행
+    entities = ner_pipeline(search_input)
+    entity_keywords = [entity['word'] for entity in entities if entity['entity'].startswith("B-")]  # 시작 엔티티만 추출
+
+    # 중복 제거 및 결합
+    keywords.extend(entity_keywords)
+    keywords = list(set(keywords))
+    
     return keywords
 
 # RAG(검색 + 생성) 기반 검색 함수 (비동기)
@@ -56,7 +77,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
     logging.info("검색을 시작합니다.")
     
     try:
-        # 1. 검색어 전처리
+        # 1. 검색어 전처리 및 NER 수행
         keywords = preprocess_search_input(search_input)
         if not keywords:
             raise EmptySearchQueryException("유효한 검색 키워드가 없습니다.")
@@ -197,5 +218,3 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
     except Exception as e:
         logging.error(f"검색 중 오류 발생: {str(e)}")
         raise
-
-
