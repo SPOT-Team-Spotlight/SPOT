@@ -47,7 +47,7 @@ def preprocess_search_input(search_input: str):
     return keywords
 
 # RAG(검색 + 생성) 기반 검색 함수
-#def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.6, faiss_weight: float = 0.4):
+def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.6, faiss_weight: float = 0.4):
     if not search_input:
         raise EmptySearchQueryException()
 
