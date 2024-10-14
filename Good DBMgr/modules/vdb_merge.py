@@ -3,6 +3,9 @@ from tkinter import ttk, filedialog, messagebox
 from configuration import save_module_config, load_module_config
 from .merger import Merger
 import os
+import json
+import pickle
+from vdb_data.common_constants import VDB_DATA_DIR, ID_FILE_PATH
 
 class VdbMergeModule:
     def __init__(self, parent, config):
@@ -16,8 +19,9 @@ class VdbMergeModule:
         self.window.geometry(f"{window_config.get('width', 600)}x{window_config.get('height', 500)}" \
                      f"+{window_config.get('x', 200)}+{window_config.get('y', 200)}")
 
-        self.project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        self.data_dir = os.path.join(self.project_root, 'data')
+        self.data_dir = VDB_DATA_DIR
+        self.id_file_path = ID_FILE_PATH
+        self.load_last_id()
 
         self.vdb1_index = tk.StringVar()
         self.vdb1_meta = tk.StringVar()
@@ -37,7 +41,7 @@ class VdbMergeModule:
         self.title_label = ttk.Label(self.main_frame, text="VDB Merge Module", font=('Helvetica', 16, 'bold'))
         self.title_label.pack(pady=10)
 
-        self.step_label = ttk.Label(self.main_frame, text="Step 1: 첫 번째 DB를 선택해주세요", font=('Helvetica', 12))
+        self.step_label = ttk.Label(self.main_frame, text="Step 1:기준이 될 db를 선택해주세요.\n해당 파일의 last_id 뒤에 데이터가 따라 붙습니다.\n인덱스와 메타 파일을 둘 다 선택해주세요", font=('Helvetica', 12))
         self.step_label.pack(pady=5)
 
         # VDB1 선택
@@ -89,7 +93,7 @@ class VdbMergeModule:
             filetypes = [("Pickle files", "*.pkl"), ("All files", "*.*")]
             title = "메타 파일을 선택해주세요"
 
-        initial_dir = self.data_dir if os.path.exists(self.data_dir) else self.project_root
+        initial_dir = self.data_dir if os.path.exists(self.data_dir) else os.path.dirname(self.data_dir)
 
         filename = filedialog.askopenfilename(
             title=title,
@@ -105,10 +109,22 @@ class VdbMergeModule:
                 self.status_var.set("첫번째 db의 인덱스와 메타 파일을 둘 다 선택해주세요")
                 return
             self.current_step = 2
-            self.step_label.config(text="Step 2: 두 번째 DB를 선택해주세요")
+            self.step_label.config(text="Step 2: 병할될 DB를 선택해주세요\n인덱스와 메타 파일을 둘 다 선택해주세요")
             self.vdb2_frame.pack(fill=tk.X, pady=5, before=self.button_frame)
             self.next_button.config(state=tk.DISABLED)
             self.merge_button.config(state=tk.NORMAL)
+
+    def load_last_id(self):
+        if os.path.exists(self.id_file_path):
+            with open(self.id_file_path, 'r') as f:
+                data = json.load(f)
+                self.last_id = data.get('last_id', 0)
+        else:
+            self.last_id = 0
+
+    def save_last_id(self, last_id):
+        with open(self.id_file_path, 'w') as f:
+            json.dump({'last_id': last_id}, f)
 
     def merge_vdbs(self):
         if not self.vdb2_index.get() or not self.vdb2_meta.get():
@@ -132,13 +148,25 @@ class VdbMergeModule:
             
             # 머지 적용
             if Merger.verify_merge(merged_index_path, merged_meta_path):
-                self.status_var.set(f"VDBs successfully merged. Output saved to {output_dir}")
-                messagebox.showinfo("Merge Successful", f"VDBs have been successfully merged.\nMerged index: {merged_index_path}\nMerged metadata: {merged_meta_path}")
+                # 메타데이터에서 최대 data_id 찾기
+                with open(merged_meta_path, 'rb') as f:
+                    merged_meta = pickle.load(f)
+                max_data_id = max(item['data_id'] for item in merged_meta)
+                
+                # last_id 업데이트 및 저장
+                self.save_last_id(max_data_id)
+                
+                self.status_var.set(f"출력된 경로: {output_dir}")
+                messagebox.showinfo("병합 성공", 
+                                    f"성공적으로 병합되었습니다.\n"
+                                    f"last_id가 {max_data_id}로 업데이트되었습니다.\n\n"
+                                    f"Merged index: {merged_index_path}\n"
+                                    f"Merged metadata: {merged_meta_path}")
             else:
-                self.status_var.set("Merge verification failed. Please check the output files.")
-        
+                self.status_var.set("병합 검증에 실패하였습니다. 출력 파일을 확인해주세요.")
+
         except Exception as e:
-            self.status_var.set(f"Error during merge: {str(e)}")
+            self.status_var.set(f"병합 중 에러가 발생했습니다: {str(e)}")
             messagebox.showerror("Merge Error", str(e))
 
     def on_closing(self):

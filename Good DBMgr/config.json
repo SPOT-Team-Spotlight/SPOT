@@ -8,21 +8,24 @@
     "theme": "arc",
     "button_style": "default",
     "vdb_creator": {
-        "width": 826,
-        "height": 659,
-        "x": 356,
-        "y": 57,
+        "width": 600,
+        "height": 552,
+        "x": 432,
+        "y": 108,
         "crawling": {
             "region": "강남역",
-            "keyword": "분식집",
-            "mode": "테스트 모드(20)",
+            "keyword": "양식",
+            "mode": "테스트 모드(10)",
             "recent_regions": [
-                "강남역"
+                "강남역",
+                "서초동"
             ],
             "recent_keywords": [
-                "분식집",
-                "맥주집",
-                "피자집"
+                "양식",
+                "양꼬치",
+                "스테이크",
+                "순대국",
+                "수제맥주"
             ]
         },
         "preprocessing": {
@@ -40,21 +43,21 @@
     },
     "vdb_retriever": {
         "width": 552,
-        "height": 532,
-        "x": 786,
-        "y": 142
+        "height": 576,
+        "x": 1261,
+        "y": 73
     },
     "vdb_merge": {
         "width": 656,
-        "height": 300,
-        "x": 754,
-        "y": 108
+        "height": 401,
+        "x": 1088,
+        "y": 164
     },
     "api_key": {
         "width": 500,
-        "height": 400,
-        "x": 300,
-        "y": 300
+        "height": 269,
+        "x": 736,
+        "y": 14
     },
     "settings": {
         "font_family": "Arial",
@@ -63,12 +66,12 @@
         "button_style": "default",
         "width": 282,
         "height": 227,
-        "x": 1212,
-        "y": 140
+        "x": 1405,
+        "y": 185
     },
     "application": {
         "width": 600,
-        "height": 720,
+        "height": 447,
         "x": 52,
         "y": 52
     }

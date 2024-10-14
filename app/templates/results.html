@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>검색 결과 - 오늘 가고 싶은 SPOT은?</title>
-    <link rel="stylesheet" href="/static/css/results.css"> <!-- CSS 파일 연결 -->
+    <link rel="stylesheet" href="/static/css/results.css">
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=cxvc9njj38"></script>
 </head>
 <body>
     <header>
@@ -18,13 +19,13 @@
         <div class="slider-container">
             <div id="sliderWrapper" class="slider-wrapper">
                 {% for result in results %}
-                <div class="slider-item">
+                <div class="slider-item" data-index="{{ loop.index0 }}" data-address="{{ result.address }}">
                     <div class="item-content">
                         <div class="item-header">
-                            <h2>{{ result.title }}</h2>
+                            <h2>{{ result.name }}</h2>
                             <div class="item-image">
                                 {% if result.image %}
-                                <img src="{{ result.image }}" alt="{{ result.title }}">
+                                <img src="{{ result.image }}" alt="{{ result.name }}">
                                 {% else %}
                                 <img src="/static/default-image.png" alt="기본 이미지">
                                 {% endif %}
@@ -32,8 +33,17 @@
                         </div>
                         <div class="item-text">
                             <p class="summary">{{ result.summary | safe }}</p>
+                            <p class="address">주소: {{ result.address }}</p>
                             <a href="{{ result.link }}" class="link-button" target="_blank">링크로 이동</a>
                             <a href="/" class="button">새로운 검색하기</a>
+                        </div>
+                        
+                        <div id="map-container-{{ loop.index0 }}" class="map-container">
+                            <div id="map-{{ loop.index0 }}" class="map"></div>
+                            <div class="store-info">
+                                <strong>{{ result.name }}</strong><br>
+                                <span>{{ result.address }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -49,6 +59,7 @@
     <script src="/static/js/results.js"></script> 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            console.log("DOMContentLoaded 이벤트 발생");
             const spinner = document.getElementById('spinner');
             if (spinner) {
                 spinner.style.display = 'none';

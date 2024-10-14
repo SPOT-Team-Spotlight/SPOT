@@ -1,8 +1,11 @@
+import logging
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import router
-from fastapi import FastAPI
+
+# 로그 레벨 설정
+logging.basicConfig(level=logging.WARNING)
 
 # FastAPI 애플리케이션 인스턴스 생성
 app = FastAPI(debug=True)
@@ -22,5 +25,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+# 라우터 등록
+app.include_router(router)
 

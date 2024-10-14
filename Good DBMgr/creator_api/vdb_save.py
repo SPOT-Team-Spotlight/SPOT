@@ -1,12 +1,10 @@
 import os
 import json
-import faiss
-import pickle
-import numpy as np
+import aiofiles
 import tkinter as tk
 from tkinter import ttk
 from .datas.constants import VECTOR_DBS
-from .faissVectorStore import FaissVectorStore
+from .improved_faiss_vector_store import ImprovedFaissVectorStore
 
 class VdbSaveModule:
     def __init__(self, parent, status_module):
@@ -15,6 +13,7 @@ class VdbSaveModule:
         self.preprocessed_data = None
         self.last_id = 0
         self.id_file_path = "./Good DBMgr/vdb_data/last_id.json"
+        self.vector_store = None
         self.create_widgets()
 
     def create_widgets(self):
@@ -34,7 +33,7 @@ class VdbSaveModule:
         save_path_frame = ttk.Frame(self.main_frame)
         save_path_frame.pack(fill=tk.X, pady=5)
         ttk.Label(save_path_frame, text="저장 경로:").pack(side=tk.LEFT, padx=(0, 5))
-        self.save_path = tk.StringVar(value="./vdb_data")
+        self.save_path = tk.StringVar(value="./Good DBMgr/vdb_data/")
         self.save_path_entry = ttk.Entry(save_path_frame, textvariable=self.save_path, width=30)
         self.save_path_entry.pack(side=tk.LEFT, expand=True, fill=tk.X)
 
@@ -42,29 +41,23 @@ class VdbSaveModule:
         self.preprocessed_data = data
         self.status_module.update_status("전처리된 데이터 수신 완료")
 
-    def load_last_id(self):
+    async def load_last_id(self):
         if os.path.exists(self.id_file_path):
-            with open(self.id_file_path, 'r') as f:
-                data = json.load(f)
+            async with aiofiles.open(self.id_file_path, 'r') as f:
+                data = json.loads(await f.read())
                 self.last_id = data.get('last_id', 0)
         else:
             self.last_id = 0
 
-    def save_last_id(self):
-        """
-        vdb 데이터 아이디를 불러오는 함수
-        """
-        with open(self.id_file_path, 'w') as f:
-            json.dump({'last_id': self.last_id}, f)
+    async def save_last_id(self):
+        async with aiofiles.open(self.id_file_path, 'w') as f:
+            await f.write(json.dumps({'last_id': self.last_id}))
 
     def get_next_id(self):
         self.last_id += 1
         return self.last_id
 
     async def save_to_vdb(self):
-        """
-        vdb에 저장하는 파일
-        """
         if self.preprocessed_data is None:
             self.status_module.update_status("저장할 데이터가 없습니다.")
             return False
@@ -78,7 +71,7 @@ class VdbSaveModule:
         os.makedirs(save_path, exist_ok=True)
 
         # 마지막 ID 로드
-        self.load_last_id()
+        await self.load_last_id()
 
         if vdb_type == "Faiss":
             success = await self.save_to_faiss(save_path)
@@ -87,7 +80,7 @@ class VdbSaveModule:
             return False
 
         # 마지막 ID 저장
-        self.save_last_id()
+        await self.save_last_id()
 
         if success:
             self.status_module.update_status(f"{vdb_type} VDB 저장 완료")
@@ -97,57 +90,33 @@ class VdbSaveModule:
         return success
 
     async def save_to_faiss(self, save_path):
-        """
-        faiss Vector DB에 저장하는 코드
-        """
         try:
-            vector_store = FaissVectorStore(
-                index_file=os.path.join(save_path, "spot_index.bin"),
-                metadata_file=os.path.join(save_path, "spot_metadata.pkl")
-            )
+            if self.vector_store is None:
+                self.vector_store = ImprovedFaissVectorStore(index_dir=save_path)
 
-            for data in self.preprocessed_data:
+            for naver_data in self.preprocessed_data:
                 data_id = self.get_next_id()
                 base_meta = {
                     "data_id": data_id,
-                    "name": data.name,
-                    "address": data.address,
-                    "photo_url": data.photo_url
+                    "name": naver_data.name,
+                    "address": naver_data.address,
+                    "link": naver_data.link
                 }
                 
-                # Google 데이터 처리
-                for i, google_item in enumerate(data.vectorized_json):
-                    vector_store.add_to_index(
-                        {f"google_{data_id}_{i}": google_item},
-                        {**base_meta, "content_type": "google", "content_index": i}
-                    )
+                if isinstance(naver_data.content, list) and isinstance(naver_data.vectorized_content, list):
+                    for chunk_index, (chunk_vector, chunk_content) in enumerate(zip(naver_data.vectorized_content, naver_data.content)):
+                        chunk_meta = {
+                            **base_meta,
+                            "chunk_index": chunk_index,
+                            "chunk_content": chunk_content
+                        }
+                        await self.vector_store.add_to_index(
+                            {f"naver_{data_id}_{chunk_index}": chunk_vector},
+                            chunk_meta
+                        )
+                else:
+                    self.status_module.update_status(f"경고: Naver 데이터 '{naver_data.name}'의 내용이 리스트 형식이 아닙니다.")
 
-                # Naver 블로그 데이터 처리
-                for blog_index, blog_data in enumerate(data.blog_datas):
-                    blog_meta = {
-                        **base_meta,
-                        "content_type": "naver_blog",
-                        "blog_index": blog_index,
-                        "link": blog_data.link
-                    }
-                    
-                    if isinstance(blog_data.content, list):
-                        for chunk_index, (chunk_vector, chunk_content) in enumerate(zip(blog_data.vectorized_content, blog_data.content)):
-                            chunk_meta = {
-                                **blog_meta,
-                                "chunk_index": chunk_index,
-                                "chunk_content": chunk_content  # 각 청크의 원본 내용
-                            }
-                            vector_store.add_to_index(
-                                {f"naver_{data_id}_{blog_index}_{chunk_index}": chunk_vector},
-                                chunk_meta
-                            )
-                    else:
-                        self.status_module.update_status(f"경고: 블로그 데이터 '{blog_data.title}'의 내용이 리스트 형식이 아닙니다.")
-
-            # 변경사항 저장
-            vector_store.save_index()
-            
             self.status_module.update_status("Faiss VDB에 데이터 저장 완료")
             return True
 

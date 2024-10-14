@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from .google_service import GoogleService
+from .naver_service import NaverService
 from .datas.constants import TEST_MODE, GATHER_MODE
 from configuration import load_module_config, save_module_config
 
@@ -12,6 +12,7 @@ class CrawlingModule:
         self.crawling_mode = tk.StringVar(value=self.config.get('mode', TEST_MODE))
         self.recent_regions = self.config.get('recent_regions', [])
         self.recent_keywords = self.config.get('recent_keywords', [])
+        self.crawling_tool = NaverService()
         self.create_widgets()
     
     def create_widgets(self):
@@ -111,9 +112,11 @@ class CrawlingModule:
         self.update_recent_items("keyword", keyword)
         
         try:
-            google_service = GoogleService(mode=mode)
-            results = google_service.google_crawling(query=keyword, region=region)
-            
+            # 모드에 따라 display 값 설정
+            display = 10 if mode == TEST_MODE else 100         
+
+            results = self.crawling_tool.crawling_naver_blog_data(query=keyword, region=region, display=display)
+
             total_results = len(results)
             
             for i, result in enumerate(results):

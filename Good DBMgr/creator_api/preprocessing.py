@@ -4,7 +4,6 @@ from .datas.constants import (EMBEDDING_MODEL_TYPES, EMBEDDING_MODEL_VERSIONS,
                               SUMMARY_MODEL_TYPES, SUMMARY_MODEL_VERSIONS)
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-import json
 from .embeddings import EmbeddingModule
 import asyncio
 
@@ -106,57 +105,37 @@ class PreprocessingModule:
 
         self.embedding = EmbeddingModule(model_name=embedding_type, version=embedding_version)
         
-        processed_results = []
-        for google_data in crawling_result:
-            processed_google_data = await self.process_google_data(google_data, chunk_size, overlap)
-            processed_results.append(processed_google_data)
+        processed_results = await self.process_naver_data_list(crawling_result, chunk_size, overlap)
         
         self.status_module.update_status("전처리 완료")
         return processed_results
 
-    async def process_google_data(self, google_data, chunk_size, overlap):
-        # 텍스트 청크 분할
-        google_data.google_json = self.do_chucking(google_data.google_json, chunk_size, overlap)
-        
-        # Google 데이터 임베딩 (배치 임베딩 사용)
-        google_data.vectorized_json = self.embedding.get_text_embeddings_batch(google_data.google_json)
-        
-        # Naver 블로그 데이터 임베딩 (비동기 처리)
+    async def process_naver_data_list(self, naver_data_list, chunk_size, overlap):
         tasks = []
-        for naver_data in google_data.blog_datas:
+        for naver_data in naver_data_list:
             if naver_data.content is not None:
-                print(naver_data.link)
                 naver_data.content = self.do_chucking(naver_data.content, chunk_size, overlap)
-                tasks.append(self.embedding.get_text_embeddings_async(naver_data.content))
+                tasks.append(self.process_single_naver_data(naver_data))
             else:
-                self.status_module.update_status(f"경고: Naver 데이터 '{google_data.name}'의 내용이 없습니다.")
+                self.status_module.update_status(f"경고: Naver 데이터 '{naver_data.name}'의 내용이 없습니다.")
         
-        # 모든 Naver 데이터 임베딩 완료 대기
-        naver_results = await asyncio.gather(*tasks, return_exceptions=True)
-        for naver_data, vectorized_content in zip(google_data.blog_datas, naver_results):
-            if naver_data.content is not None:
-                if isinstance(vectorized_content, Exception):
-                    self.status_module.update_status(f"경고: Naver 데이터 '{google_data.name}' 임베딩 중 오류 발생: {vectorized_content}")
-                else:
-                    naver_data.vectorized_content = vectorized_content
+        processed_results = await asyncio.gather(*tasks, return_exceptions=True)
         
-        self.status_module.update_status(f"Google 데이터 처리 완료: {google_data.name}")
-        return google_data
+        return [result for result in processed_results if not isinstance(result, Exception)]
+    
+    async def process_single_naver_data(self, naver_data):
+        try:
+            naver_data.vectorized_content = await self.embedding.get_text_embeddings_async(naver_data.content)
+            self.status_module.update_status(f"Naver 데이터 처리 완료: {naver_data.name}")
+            return naver_data
+        except Exception as e:
+            self.status_module.update_status(f"경고: Naver 데이터 '{naver_data.name}' 처리 중 오류 발생: {e}")
+            return e
         
     def do_chucking(self, data, size, overlap) -> list:
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=int(size), chunk_overlap=int(overlap))
-        isDict = isinstance(data, dict)
-
-        if isDict:
-            data = json.dumps(data, ensure_ascii=False)
-
         doc = Document(page_content=data) 
         chunked_list = text_splitter.split_documents([doc])
-
-        if isDict:
-            # 청킹된 문서를 dict 리스트로 변환
-            return [{"chunk": i, "content": chunk.page_content} for i, chunk in enumerate(chunked_list)]
-
         return [chunk.page_content for chunk in chunked_list]
 
     def get_widget(self):

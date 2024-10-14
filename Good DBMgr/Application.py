@@ -11,7 +11,7 @@ from configuration import load_config, save_config, load_module_config, save_mod
 class Application:
     def __init__(self, root):   
         self.root = root
-        self.root.title("Good DB Mgr (alpha ver 1.23)")
+        self.root.title("Good DB Mgr (ver 1.24)")
         self.config = load_config()
         self.apply_settings(self.config)
         self.create_widgets()

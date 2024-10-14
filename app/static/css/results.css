@@ -56,6 +56,23 @@ header {
     margin: 10px 0;
 }
 
+/* 지도 요소 */
+.map {
+    width: 500px;
+    height: 300px;
+    border: 1px solid #b3e5fc;
+    border-radius: 10px;
+    margin: 20px auto;
+}
+
+/* 가게 정보 스타일 */
+.store-info {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 1rem;
+    color: #333;
+}
+
 /* 슬라이드 내 버튼 */
 .slider-button {
     position: absolute;
@@ -154,7 +171,7 @@ header {
         padding: 20px; /* 모바일에서 여백 축소 */
     }
 
-    .item-header h3 {
+    .item-header h4 {
         font-size: 1.5rem; /* 모바일에서 제목 크기 축소 */
     }
 
@@ -165,5 +182,11 @@ header {
 
     .item-text {
         max-width: 100%;
+    }
+
+    .map {
+        width: 100%; /* 모바일에서 지도의 너비를 가로 전체에 맞춤 */
+        max-width: none; /* 모바일에서 최대 너비 제한을 없앰 */
+        height: 200px; /* 모바일에서 지도의 높이 축소 */
     }
 }
