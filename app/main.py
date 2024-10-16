@@ -3,7 +3,8 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import router
-
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 # 로그 레벨 설정
 logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
