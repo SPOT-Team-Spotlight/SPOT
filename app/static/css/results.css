@@ -42,6 +42,7 @@ header {
 .slider-wrapper {
     display: flex;
     transition: transform 0.3s ease-in-out;
+    width: 100%;
 }
 
 /* 슬라이드 아이템 */
@@ -56,15 +57,28 @@ header {
     margin: 10px 0;
 }
 
-/* 지도 요소 */
-.map {
-    width: 500px;
-    height: 300px;
-    border: 1px solid #b3e5fc;
-    border-radius: 10px;
-    margin: 20px auto;
+/* 지도 컨테이너 스타일 */
+.map-container {
+    width: 100%;
+    max-width: 500px; /* 최대 너비를 제한하여 지도 크기를 일정하게 유지 */
+    margin: 20px auto; /* 상하 여백을 추가하고 가운데 정렬 */
+    padding: 10px;
+    box-sizing: border-box; /* 패딩을 포함한 박스 크기 설정 */
+    background-color: #f8f8f8; /* 약간의 배경색 추가 */
+    border: 1px solid #b3e5fc; /* 테두리 색상 설정 */
+    border-radius: 10px; /* 둥근 모서리 추가 */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
+    text-align: center; /* 컨테이너 내 콘텐츠를 가운데 정렬 */
 }
 
+/* 지도 요소 */
+.map {
+    width: 100%;
+    max-width: 450px; /* 최대 너비 제한 추가 */
+    height: 300px;
+    border-radius: 10px;
+    margin: 0 auto; /* 지도의 좌우 중앙 정렬 */
+}
 /* 가게 정보 스타일 */
 .store-info {
     text-align: center;
@@ -165,9 +179,10 @@ header {
     background-color: #0277bd;
 }
 
-/* 반응형 디자인 */
 @media (max-width: 600px) {
     .slider-item {
+        min-width: 90%;
+        margin: 0 auto; /* 모바일에서 슬라이더 아이템을 중앙에 배치 */
         padding: 20px; /* 모바일에서 여백 축소 */
     }
 
@@ -184,9 +199,19 @@ header {
         max-width: 100%;
     }
 
+    .map-container {
+        width: 100%; /* 모바일에서 지도의 너비를 부모 컨테이너에 맞춤 */
+        padding: 5px; /* 모바일에서 패딩 축소 */
+        margin: 10px auto; /* 모바일에서 상하 좌우 여백을 주어 중앙에 배치 */
+    }
+
     .map {
         width: 100%; /* 모바일에서 지도의 너비를 가로 전체에 맞춤 */
-        max-width: none; /* 모바일에서 최대 너비 제한을 없앰 */
         height: 200px; /* 모바일에서 지도의 높이 축소 */
+        margin: 0 auto; /* 지도의 좌우 중앙 정렬 */
+    }
+
+    .store-info {
+        font-size: 0.9rem; /* 모바일 환경에서 가게 정보 크기 조정 */
     }
 }

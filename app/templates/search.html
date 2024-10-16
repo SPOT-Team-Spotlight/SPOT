@@ -9,12 +9,12 @@
 <body>
     <header>
         <img src="/static/logo.png" alt="사이트 로고" width="80" height="80">
-        <h1>오늘 가고 싶은 SPOT은?</h1>
+        <h1><img src="/static/foot.png" width="40" height="40">오늘 가고 싶은 SPOT은?</h1>
     </header>
 
     <!-- 검색 폼 -->
     <form id="searchForm" method="POST" action="/search/">
-        <input type="text" id="searchInput" name="search_input" placeholder="검색어와 지역을 입력하세요 (예: 서울 맛집)">
+        <input type="text" id="searchInput" name="search_input" placeholder="특별한 맛집을 문장으로 검색해보세요.">
         <button type="submit">검색</button><br/>
         <button type="button" id="voiceSearchButton">🎤 음성 검색</button>
     </form>

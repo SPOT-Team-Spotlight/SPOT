@@ -10,6 +10,7 @@
 - 실행시 터미널 입력
   - conda activate {가상환경이름}
   - uvicorn app.main:app --reload 입력
+  - uvicorn app.main:app --host 0.0.0.0 --port 8000 (NET(와이파이) 배포시)
 
 - vdb 초기화 방법
 삭제 : spot_index.bin, spot_metadata.pkl, vdbLog.txt, log_number.txt

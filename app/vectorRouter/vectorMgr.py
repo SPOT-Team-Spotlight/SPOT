@@ -14,6 +14,8 @@ from app.vectorRouter.promptMgr import generate_gpt_response  # 요약 생성 �
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from transformers import pipeline
 import torch
+import requests
+import base64
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -137,8 +139,10 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
         metadata_index = defaultdict(dict)  # metadata_index 정의
         for meta in vector_store.metadata:
             data_id = meta.get("data_id")
+
             metadata_index[data_id]['link'] = meta.get("link", "")
             metadata_index[data_id]['name'] = meta.get("name", "Unknown")
+            metadata_index[data_id]['img'] = meta.get("img")    # 디폴트 값이 없어야 html에서 not found 이미지 출력
             metadata_index[data_id]['address'] = meta.get("address", "Unknown")
 
         # 결과 수집 및 같은 data_id를 가진 chunk 결합
@@ -171,7 +175,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
         unique_names = set()
 
         start_time = time.time()
-
+        
         tasks = []
         for data_id, chunks in combined_results.items():
             full_content = " ".join(chunks)
@@ -181,6 +185,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
             link = meta_info.get('link', '')
             name = meta_info.get('name', 'Unknown')
             address = meta_info.get('address', 'Unknown')
+            img = meta_info.get('img')
 
             if name in unique_names:
                 continue
@@ -197,6 +202,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
                 "summary": "",  # 요약 생성 후 채워질 예정
                 "address": address,
                 "data_id": data_id,
+                "image": image_url_to_base64(img),
                 "link": link
             })
 
@@ -218,3 +224,12 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
     except Exception as e:
         logging.error(f"검색 중 오류 발생: {str(e)}")
         raise
+
+def image_url_to_base64(image_url):
+    response = requests.get(image_url)
+    if response.status_code == 200:
+        image_binary = response.content
+        image_base64 = base64.b64encode(image_binary).decode('utf-8')
+        return f"data:image/png;base64,{image_base64}"
+    else:
+        raise Exception(f"Failed to retrieve image. Status code: {response.status_code}")

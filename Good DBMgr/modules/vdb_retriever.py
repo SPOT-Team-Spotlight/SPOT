@@ -1,12 +1,10 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
 from configuration import save_module_config, load_module_config
-from creator_api.improved_faiss_vector_store import ImprovedFaissVectorStore
+from creator_api.faissVectorStore import FaissVectorStore
 from creator_api.embeddings import EmbeddingModule
 from creator_api.datas.constants import EMBEDDING_MODEL_TYPES, EMBEDDING_MODEL_VERSIONS
 import os
-import asyncio
-import threading
 
 class VdbRetrieverModule:
     def __init__(self, parent, config):
@@ -29,11 +27,6 @@ class VdbRetrieverModule:
         self.create_widgets()
         
         self.window.protocol("WM_DELETE_WINDOW", self.on_closing)
-
-        # asyncio 이벤트 루프 생성
-        self.loop = asyncio.new_event_loop()
-        self.thread = threading.Thread(target=self.run_async_loop, daemon=True)
-        self.thread.start()
 
     def create_widgets(self):
         self.main_frame = ttk.Frame(self.window, padding="10")
@@ -66,10 +59,6 @@ class VdbRetrieverModule:
 
         # 나머지 위젯들을 생성하지만 초기에는 숨김
         self.create_hidden_widgets()
-    
-    def run_async_loop(self):
-        asyncio.set_event_loop(self.loop)
-        self.loop.run_forever()
 
     def create_hidden_widgets(self):
         # 임베딩 모델 선택
@@ -154,22 +143,20 @@ class VdbRetrieverModule:
             elif file_type == 'metadata':
                 self.metadata_path_var.set(filename)
 
-    async def load_data_async(self):
-        index_dir = os.path.dirname(self.index_path_var.get())
-        if index_dir:
+    def load_data(self):
+        index_file = self.index_path_var.get()
+        metadata_file = self.metadata_path_var.get()
+        if index_file and metadata_file:
             try:
-                self.vector_store = ImprovedFaissVectorStore(index_dir=index_dir)
-                await asyncio.to_thread(self.vector_store.load_shards)
+                self.vector_store = FaissVectorStore(index_file=index_file, metadata_file=metadata_file)
+                self.vector_store.load_index()
                 self.status_var.set("데이터 로드 완료")
-                self.window.after(0, self.show_hidden_widgets)
-                self.window.after(0, lambda: self.load_button.config(state="disabled"))
+                self.show_hidden_widgets()
+                self.load_button.config(state="disabled")  # 데이터 로드 후 버튼 비활성화
             except Exception as e:
                 self.status_var.set(f"데이터 로드 실패: {str(e)}")
         else:
-            self.status_var.set("Index 디렉토리를 선택해주세요.")
-
-    def load_data(self):
-        asyncio.run_coroutine_threadsafe(self.load_data_async(), self.loop)
+            self.status_var.set("Index와 Metadata 파일을 모두 선택해주세요.")
 
     def increase_count(self):
         current = int(self.count_var.get())
@@ -180,7 +167,7 @@ class VdbRetrieverModule:
         if current > 1:
             self.count_var.set(str(current - 1))
 
-    async def search_async(self):
+    def search(self):
         query = self.query_entry.get()
         k = int(self.count_var.get())
 
@@ -191,33 +178,44 @@ class VdbRetrieverModule:
             self.embedding = EmbeddingModule(model_name=embedding_type, version=embedding_version)
 
         try:
-            query_vector = await self.embedding.get_text_embeddings_async([query])
-            distances, indices = await self.vector_store.search(query_vector[0], k)
+            query_vector = self.embedding.get_text_embedding_sync(query)
+            distances, indices = self.vector_store.search(query_vector, k * 2)
             
             results = []
-            metadata_list = self.vector_store.get_metadata(indices[0])
+            seen_data_ids = set()
             
-            for distance, metadata in zip(distances[0], metadata_list):
-                result_str = f"Distance: {distance:.4f}\n"
-                for key, value in metadata.items():
-                    result_str += f"{key}: {value}\n"
-                results.append(result_str)
+            for distance, idx in zip(distances[0], indices[0]):
+                if idx < len(self.vector_store.metadata):
+                    metadata = self.vector_store.metadata[idx]
+                    data_id = metadata.get('data_id')
+                    
+                    if data_id not in seen_data_ids:
+                        seen_data_ids.add(data_id)
+                        
+                        result_str = f"Distance: {distance:.4f}\n"
+                        for key, value in metadata.items():
+                            result_str += f"{key}: {value}\n"
+                        
+                        results.append(result_str)
+                        
+                        if len(results) == k:
+                            break
+                else:
+                    break
 
-            self.window.after(0, lambda: self.update_results(results))
-            self.window.after(0, lambda: self.status_var.set("검색 완료"))
+            if len(results) < k:
+                self.status_var.set(f"주의: 요청한 {k}개의 결과 중 {len(results)}개만 찾았습니다.")
+            else:
+                self.status_var.set("검색 완료")
+
+            self.result_text.config(state="normal")
+            self.result_text.delete(1.0, tk.END)
+            for i, result in enumerate(results, 1):
+                self.result_text.insert(tk.END, f"{i}.\n{result}\n\n")
+            self.result_text.config(state="disabled")
 
         except Exception as e:
-            self.window.after(0, lambda: self.status_var.set(f"검색 중 오류 발생: {str(e)}"))
-
-    def search(self):
-        asyncio.run_coroutine_threadsafe(self.search_async(), self.loop)
-
-    def update_results(self, results):
-        self.result_text.config(state="normal")
-        self.result_text.delete(1.0, tk.END)
-        for i, result in enumerate(results, 1):
-            self.result_text.insert(tk.END, f"{i}.\n{result}\n\n")
-        self.result_text.config(state="disabled")
+            self.status_var.set(f"검색 중 오류 발생: {str(e)}")
 
     def on_closing(self):
         window_config = {
@@ -227,5 +225,4 @@ class VdbRetrieverModule:
             'y': self.window.winfo_y()
         }
         save_module_config('vdb_retriever', window_config)
-        self.loop.call_soon_threadsafe(self.loop.stop)
         self.window.destroy()

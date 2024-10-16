@@ -58,24 +58,3 @@ class FaissVectorStore:
         distances, indices = self.index.search(query_vector, k)
         return distances, indices
 
-    def add_vectors(self, vectors, metadata_list):
-        """
-        새로운 벡터를 인덱스에 추가합니다.
-        :param vectors: 추가할 벡터 리스트
-        :param metadata_list: 추가할 벡터의 메타데이터 리스트
-        """
-        vectors = np.array(vectors, dtype='float32')
-        
-        if self.index is None:
-            # 인덱스가 없을 경우 새로 생성 (FlatL2 기본 사용)
-            self.dim = vectors.shape[1]
-            self.index = faiss.index_factory(self.dim, "IVF256,Flat", faiss.METRIC_L2)
-            self.index.train(vectors)
-        
-        self.index.add(vectors)
-        self.metadata.extend(metadata_list)
-        
-        # 인덱스와 메타데이터를 저장
-        faiss.write_index(self.index, self.index_file)
-        with open(self.metadata_file, 'wb') as f:
-            pickle.dump(self.metadata, f) 
