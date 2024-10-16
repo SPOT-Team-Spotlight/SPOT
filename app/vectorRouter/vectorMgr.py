@@ -1,6 +1,6 @@
 import re
 from dotenv import load_dotenv
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from app.vectorRouter.exceptions import EmptySearchQueryException, EmptyVectorStoreException, NoSearchResultsException
 from rank_bm25 import BM25Okapi
 import os
@@ -10,12 +10,13 @@ import time
 import logging
 import asyncio
 from app.vectorRouter.FaissVectorStore import FaissVectorStore
-from app.vectorRouter.promptMgr import generate_gpt_response  # 요약 생성 함수 가져오기
+from app.vectorRouter.promptMgr import generate_gpt_response
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from transformers import pipeline
 import torch
 import requests
 import base64
+import aiohttp
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -42,12 +43,12 @@ tokenized_corpus = [doc.split(" ") for doc in corpus]
 bm25 = BM25Okapi(tokenized_corpus)
 
 # NER 모델 로드
-ner_model_name = "klue/bert-base"  # NER 모델 사용
+ner_model_name = "klue/bert-base"
 ner_tokenizer = AutoTokenizer.from_pretrained(ner_model_name)
 try:
     ner_model = AutoModelForTokenClassification.from_pretrained(ner_model_name)
 except EnvironmentError:
-    raise EnvironmentError("모델 'klue/bert-base'을 로드할 수 없습니다. 모델이 존재하는지 확인하거나, 올바른 토큰을 제공하세요.")
+    raise EnvironmentError("모델 'klue/bert-base'을 로드할 수 없습니다.")
 ner_pipeline = pipeline("ner", model=ner_model, tokenizer=ner_tokenizer, framework="pt", device=0 if torch.cuda.is_available() else -1)
 
 # OpenAI 임베딩을 생성하는 함수
@@ -55,148 +56,102 @@ def get_openai_embedding(text: str):
     embedding = embeddings.embed_query(text)
     return np.array(embedding, dtype=np.float32)
 
-# 검색어를 전처리하고 NER 수행하는 함수
+# 검색어를 전처리하고 NER 수행하는 함수 (필요 없는 키워드 필터링 추가)
 def preprocess_search_input(search_input: str):
-    # 기본 전처리 (키워드 추출)
     keywords = re.findall(r'\b\w+\b', search_input)
     keywords = [word for word in keywords if len(word) > 1]
 
     # NER 수행
     entities = ner_pipeline(search_input)
-    entity_keywords = [entity['word'] for entity in entities if entity['entity'].startswith("B-")]  # 시작 엔티티만 추출
+    entity_keywords = [entity['word'] for entity in entities if entity['entity'].startswith("B-")]
 
-    # 중복 제거 및 결합
     keywords.extend(entity_keywords)
-    keywords = list(set(keywords))
     
-    return keywords
+    # 중요하지 않은 단어 필터링
+    filtered_keywords = [word for word in keywords if word not in ["에서", "의", "이", "가"]]
+    filtered_keywords = list(set(filtered_keywords))
+    
+    return filtered_keywords
 
 # RAG(검색 + 생성) 기반 검색 함수 (비동기)
-async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.4, faiss_weight: float = 0.6):
+async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.8, faiss_weight: float = 0.5, threshold: float = 0.6):
     if not search_input:
         raise EmptySearchQueryException()
 
     logging.info("검색을 시작합니다.")
     
     try:
-        # 1. 검색어 전처리 및 NER 수행
         keywords = preprocess_search_input(search_input)
         if not keywords:
             raise EmptySearchQueryException("유효한 검색 키워드가 없습니다.")
         
         logging.info(f"검색어 전처리 완료: {keywords}")
     
-        # 2. BM25 검색
+        # BM25 검색
         bm25_scores = np.zeros(len(corpus))
         for keyword in keywords:
             tokenized_query = keyword.split(" ")
             keyword_scores = bm25.get_scores(tokenized_query)
             bm25_scores += keyword_scores
 
-        # BM25 점수 정규화
         if np.max(bm25_scores) > 0:
             bm25_scores = bm25_scores / np.max(bm25_scores)
 
-        # 상위 BM25 인덱스 선택
-        top_bm25_indices = np.argsort(bm25_scores)[-200:]
-        logging.info(f"BM25 후보 개수: {len(top_bm25_indices)}")
+        # 상위 K개의 문서만 선택
+        top_bm25_indices = np.argsort(bm25_scores)[-k:]
 
-        if len(top_bm25_indices) == 0:
-            raise NoSearchResultsException("BM25 검색에서 결과를 찾을 수 없습니다.")
-        
-        # 3. FAISS 검색
+        # FAISS 검색
         embedding = get_openai_embedding(search_input)
         
         if vector_store.dim is None:
             raise EmptyVectorStoreException("FAISS 벡터 저장소가 초기화되지 않았습니다.")
 
-        # FAISS 검색 수행
-        D, I = vector_store.search(embedding.reshape(1, -1), k=200)
-        logging.info(f"FAISS 후보 개수: {len(I[0])}")
+        D, I = vector_store.search(embedding.reshape(1, -1), k=k)
 
-        # FAISS 검색 결과 분석
-        print("FAISS 검색 결과 (상위 10개):")
-        for i in range(min(10, len(I[0]))):
-            idx = I[0][i]
-            distance = D[0][i]
-            meta = vector_store.metadata[idx]
-            print(f"인덱스: {idx}, 거리: {distance:.4f}")
-            print(f"  데이터 ID: {meta.get('data_id')}")
-            print(f"  이름: {meta.get('name')}")
-            print(f"  chunk_content: {meta.get('chunk_content')[:100]}...")  # 처음 100자만 출력
-            print()
-
-        # FAISS 유사도 정규화
         faiss_similarities = 1 - D[0]
         if np.max(faiss_similarities) > 0:
             faiss_similarities = faiss_similarities / np.max(faiss_similarities)
 
-        # 5. BM25와 FAISS 점수 결합
+        # BM25와 FAISS 점수 결합 (가중치 조정)
         combined_scores = {}
-
-        # bm25의 상위권에 대해서 점수 계산
         for idx in top_bm25_indices:
-            bm25_score = bm25_scores[idx]
-            if idx in I[0]:
-                faiss_score = faiss_similarities[list(I[0]).index(idx)]
-                if bm25_score > 0 and faiss_score > 0:
-                    combined_scores[idx] = bm25_score * bm25_weight + faiss_score * faiss_weight
+            bm25_score = bm25_scores[idx] * bm25_weight
+            faiss_score = faiss_similarities[np.where(I[0] == idx)[0][0]] * faiss_weight if idx in I[0] else 0
+            combined_scores[idx] = bm25_score + faiss_score
 
-        # FAISS에서 높은 점수를 받았지만 BM25의 상위 결과에 포함되지 않은 문서들을 처리
-        for idx, doc_id in enumerate(I[0]):
-            if doc_id not in combined_scores:
-                bm25_score = bm25_scores[doc_id] if doc_id < len(bm25_scores) else 0
-                faiss_score = faiss_similarities[idx]
-                if bm25_score > 0 and faiss_score > 0:
-                    combined_scores[doc_id] = bm25_score * bm25_weight + faiss_score * faiss_weight
+        # 임계값 적용 및 상위 k개의 결과 선택
+        filtered_scores = {idx: score for idx, score in combined_scores.items() if score >= threshold}
+        ranked_indices = sorted(filtered_scores, key=filtered_scores.get, reverse=True)
 
-        # 6. 결합된 점수로 상위 문서 선택 및 정렬
-        ranked_indices = sorted(combined_scores, key=combined_scores.get, reverse=True)
-        logging.info(f"결합된 후보 개수: {len(ranked_indices)}")
+        logging.info(f"최종 선택된 문서 개수: {len(ranked_indices)}")
 
-        # BM25와 FAISS 결합 후 결과 분석
-        print("BM25와 FAISS 결합 후 검색 결과 (상위 10개):")
-        for i, idx in enumerate(ranked_indices[:10]):
-            meta = vector_store.metadata[idx]
-            combined_score = combined_scores[idx]
-            bm25_score = bm25_scores[idx] if idx < len(bm25_scores) else 0
-            faiss_score = faiss_similarities[list(I[0]).index(idx)] if idx in I[0] else 0
-            
-            print(f"순위 {i+1}:")
-            print(f"  인덱스: {idx}")
-            print(f"  결합 점수: {combined_score:.4f}")
-            print(f"  BM25 점수: {bm25_score:.4f}")
-            print(f"  FAISS 점수: {faiss_score:.4f}")
-            print(f"  데이터 ID: {meta.get('data_id')}")
-            print(f"  이름: {meta.get('name')}")
-            print(f"  chunk_content: {meta.get('chunk_content')[:100]}...")  # 처음 100자만 출력
-            print()
-
-        # 7. 미리 인덱싱한 메타데이터 사전 생성
-        metadata_index = defaultdict(dict)  # metadata_index 정의
+        # 메타데이터 인덱스 생성
+        metadata_index = defaultdict(dict)
         for meta in vector_store.metadata:
             data_id = meta.get("data_id")
-
             metadata_index[data_id]['link'] = meta.get("link", "")
             metadata_index[data_id]['name'] = meta.get("name", "Unknown")
-            metadata_index[data_id]['img'] = meta.get("img")    # 디폴트 값이 없어야 html에서 not found 이미지 출력
+            metadata_index[data_id]['img'] = meta.get("img")
             metadata_index[data_id]['address'] = meta.get("address", "Unknown")
 
-        # 결과 수집 및 같은 data_id를 가진 chunk 결합
+        # 결과 수집 및 요약 생성
         seen = set()
-        combined_results = defaultdict(list)  # data_id를 기준으로 chunk_content 결합
+        combined_results = defaultdict(list)
+        selected_results = []
+        unique_names = set()
 
+        start_time = time.time()
+        tasks = []
+        
         for idx in ranked_indices:
             if idx < len(vector_store.metadata):
                 meta = vector_store.metadata[idx]
                 data_id = meta.get("data_id")
-                name = meta.get("name")
 
                 if data_id in seen:
                     continue
                 seen.add(data_id)
 
-                # 해당 data_id로 그룹화된 모든 유효한 chunk_content를 수집
                 for m in vector_store.metadata:
                     if m.get("data_id") == data_id:
                         chunk_content = m.get("chunk_content", "")
@@ -206,20 +161,10 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
                 if len(combined_results) >= k:
                     break
 
-        logging.info(f"선택된 결과 수: {len(combined_results)}")
-        print(combined_results.items())
-
-        # 8. 비동기 요약 생성
-        selected_results = []
-        unique_names = set()
-
-        start_time = time.time()
-        
-        tasks = []
+        # 비동기 요약 생성
         for data_id, chunks in combined_results.items():
             full_content = " ".join(chunks)
 
-            # 인덱스를 사용하여 링크, 이름, 주소 빠르게 조회
             meta_info = metadata_index.get(data_id, {})
             link = meta_info.get('link', '')
             name = meta_info.get('name', 'Unknown')
@@ -230,25 +175,20 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
                 continue
             unique_names.add(name)
 
-            logging.info(f"선택된 링크: {link}")
-
-            # 비동기 요약 생성 요청 추가
             task = generate_gpt_response(name, full_content)
             tasks.append(task)
 
             selected_results.append({
                 "name": name,
-                "summary": "",  # 요약 생성 후 채워질 예정
+                "summary": "",
                 "address": address,
                 "data_id": data_id,
                 "image": image_url_to_base64(img),
                 "link": link
             })
 
-        # 비동기 요약 생성 완료 대기
         summaries = await asyncio.gather(*tasks)
 
-        # 요약을 결과에 추가
         for i, summary in enumerate(summaries):
             selected_results[i]['summary'] = summary
 

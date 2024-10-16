@@ -19,7 +19,7 @@ body {
 header {
     width: 100%;
     padding: 20px 0;
-    background-color: #ffffff; /* 헤더 색상 흰색으로 변경 */
+    background-color: #ffffff;
     color: #333;
     display: flex;
     flex-direction: column;
@@ -41,8 +41,9 @@ h1 {
 /* Swiper 슬라이더 스타일 */
 .swiper-container {
     width: 100%;
-    max-width: 500px; /* 검색 폼과 동일한 너비로 설정 */
-    margin: 20px auto; /* 중앙 정렬 */
+    max-width: 500px;
+    margin: 20px auto;
+    overflow: hidden;
 }
 
 .swiper-slide {
@@ -56,6 +57,7 @@ h1 {
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    height: 140px;
 }
 
 .swiper-button-next,
@@ -83,7 +85,7 @@ h1 {
     max-width: 500px;
     width: 90%;
     margin-top: 30px;
-    min-height: 200px;
+    min-height: 400px;
 }
 
 #searchInput {
@@ -136,30 +138,18 @@ button:active {
 }
 
 /* 스피너 스타일 */
-.spinner-container {
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: rgba(255, 255, 255, 0.8); /* 반투명한 배경 */
-    width: 300px; 
-    height: 200px;
-}
-
 #spinner {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    display: flex;
+    display: none; /* 기본적으로 숨김 */
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    overflow: hidden; /* 비디오가 컨테이너를 벗어나지 않도록 */
+    overflow: hidden;
 }
 
 #spinnerVideo {
@@ -171,28 +161,19 @@ button:active {
     width: auto;
     height: auto;
     transform: translateX(-50%) translateY(-50%);
-    z-index: -1; /* 비디오를 다른 요소들 뒤에 배치 */
-}
-
-.spinner {
-    border: 6px solid #f3f3f3;
-    border-top: 6px solid #0288d1;
-    border-radius: 50%;
-    width: 80px;
-    height: 80px;
-    animation: spin 1s linear infinite;
+    z-index: -1;
 }
 
 .spinner-container {
     padding: 40px;
     border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.8); /* 반투명한 배경 */
-    width: 300px; 
-    height: 200px;
+    background-color: rgba(255, 255, 255, 0.8);
+    width: 300px;
+    height: 300px;
 }
 
 .spinner {
@@ -211,53 +192,55 @@ button:active {
 
 #spinner p {
     margin-top: 20px;
-    font-size: 1rem; /* 글자 크기 조정 */
+    font-size: 1rem;
     color: #333;
     font-weight: bold;
 }
 
 /* 반응형 디자인 */
-@media (max-width: 768px) {
+@media (max-width: 1024px) and (min-width: 769px) {
+    /* 태블릿 스타일 */
     #searchForm {
-        padding: 20px 15px;
+        max-width: 600px;
+        padding: 20px 25px;
+    }
+
+    h1 {
+        font-size: 2.2rem;
     }
 
     #searchInput {
-        font-size: 0.95rem;
+        font-size: 1.05rem;
     }
 
     button {
-        font-size: 1rem;
+        font-size: 1.05rem;
     }
 
     .swiper-container {
-        width: 95%;
+        max-width: 600px;
     }
 
     .swiper-slide {
-        font-size: 0.95rem;
-        padding: 15px;
+        font-size: 1rem;
+        padding: 20px;
     }
-
 }
 
-@media (max-width: 480px) {
-    header img {
-        width: 60px;
-        height: 60px;
+@media (max-width: 768px) and (min-width: 481px) {
+    /* 모바일 스타일 */
+    #searchForm {
+        max-width: 90%;
+        padding: 20px 15px;
     }
 
     h1 {
         font-size: 1.8rem;
     }
 
-    #searchForm {
-        padding: 15px 10px;
-    }
-
     #searchInput {
         padding: 12px;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
     }
 
     button {
@@ -265,14 +248,51 @@ button:active {
         font-size: 1rem;
     }
 
-    .spinner {
+    .swiper-container {
+        max-width: 100%;
+        width: 95%;
+    }
+
+    .swiper-slide {
+        font-size: 0.95rem;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* 작은 모바일 스타일 */
+    header img {
         width: 60px;
         height: 60px;
-        border-width: 4px;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+    }
+
+    #searchForm {
+        padding: 15px 10px;
+        min-height: 300px;
+    }
+
+    #searchInput {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    button {
+        padding: 10px 18px;
+        font-size: 0.95rem;
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border-width: 3px;
     }
 
     #spinner p {
-        font-size: 1rem;
+        font-size: 0.9rem;
     }
 
     .swiper-container {

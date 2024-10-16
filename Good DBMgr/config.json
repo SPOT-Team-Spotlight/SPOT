@@ -9,23 +9,22 @@
     "button_style": "default",
     "vdb_creator": {
         "width": 600,
-        "height": 549,
-        "x": 307,
-        "y": 101,
+        "height": 603,
+        "x": 1047,
+        "y": 230,
         "crawling": {
             "region": "강남역",
-            "keyword": "칼국수 내돈내산",
+            "keyword": "아구찜 내돈내산",
             "mode": "데이터 수집 모드(100)",
             "recent_regions": [
-                "강남역",
-                "서초동"
+                "강남역"
             ],
             "recent_keywords": [
-                "칼국수 내돈내산",
-                "사시미 내돈내산",
-                "소고기전골 내돈내산",
-                "성게비빔밥 내돈내산",
-                "생선구이 내돈내산"
+                "아구찜 내돈내산",
+                "애플파이 내돈내산",
+                "물회 내돈내산",
+                "문어숙회 내돈내산",
+                "커피 내돈내산"
             ]
         },
         "preprocessing": {
@@ -42,37 +41,33 @@
         "y": 200
     },
     "vdb_retriever": {
-        "width": 552,
-        "height": 576,
-        "x": 1261,
-        "y": 73
+        "width": 400,
+        "height": 300,
+        "x": 250,
+        "y": 250
     },
     "vdb_merge": {
-        "width": 783,
-        "height": 543,
-        "x": 805,
-        "y": 139
+        "width": 400,
+        "height": 300,
+        "x": 250,
+        "y": 250
     },
     "api_key": {
         "width": 500,
-        "height": 269,
-        "x": 736,
-        "y": 14
+        "height": 400,
+        "x": 300,
+        "y": 300
     },
     "settings": {
-        "font_family": "Arial",
-        "font_size": 12,
-        "theme": "scidblue",
-        "button_style": "default",
-        "width": 282,
-        "height": 227,
-        "x": 1405,
-        "y": 185
+        "width": 300,
+        "height": 250,
+        "x": 350,
+        "y": 350
     },
     "application": {
-        "width": 803,
-        "height": 290,
-        "x": 914,
-        "y": 133
+        "width": 600,
+        "height": 420,
+        "x": 6,
+        "y": 243
     }
 }
