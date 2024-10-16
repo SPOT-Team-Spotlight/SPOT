@@ -102,7 +102,9 @@ button:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.8); /* 반투명한 배경 */
+    width: 300px; 
+    height: 200px;
 }
 
 #spinner {
@@ -111,12 +113,24 @@ button:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    overflow: hidden; /* 비디오가 컨테이너를 벗어나지 않도록 */
+}
+
+#spinnerVideo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translateX(-50%) translateY(-50%);
+    z-index: -1; /* 비디오를 다른 요소들 뒤에 배치 */
 }
 
 .spinner {
@@ -128,6 +142,27 @@ button:hover {
     animation: spin 1s linear infinite;
 }
 
+.spinner-container {
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.8); /* 반투명한 배경 */
+    width: 300px; 
+    height: 200px;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #0288d1;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -135,7 +170,9 @@ button:hover {
 
 #spinner p {
     margin-top: 20px;
-    font-size: 1.2rem;
+    font-size: 1rem; /* 글자 크기 조정 */
     color: #333;
     font-weight: bold;
+    max-width: 250px; /* 텍스트 최대 너비 설정 */
+    overflow-wrap: break-word; /* 긴 단어 줄바꿈 */
 }
