@@ -74,14 +74,14 @@ def preprocess_search_input(search_input: str):
 
 # RAG(검색 + 생성) 기반 검색 함수 (비동기)
 
-async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.8, faiss_weight: float = 0.5, threshold: float = 0.6):
-
+async def search_with_rag(search_input: str, k: int = 7, bm25_weight: float = 0.8, faiss_weight: float = 0.5, threshold: float = 0.5):
     if not search_input:
         raise EmptySearchQueryException()
 
     logging.info("검색을 시작합니다.")
     
     try:
+        # 검색어 전처리
         keywords = preprocess_search_input(search_input)
         if not keywords:
             raise EmptySearchQueryException("유효한 검색 키워드가 없습니다.")
@@ -98,7 +98,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
         if np.max(bm25_scores) > 0:
             bm25_scores = bm25_scores / np.max(bm25_scores)
 
-        # 상위 K개의 문서만 선택
+        # 상위 K개의 문서 선택
         top_bm25_indices = np.argsort(bm25_scores)[-k:]
 
         # FAISS 검색
@@ -114,27 +114,37 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
             faiss_similarities = faiss_similarities / np.max(faiss_similarities)
 
         # BM25와 FAISS 점수 결합 (가중치 조정)
-        combined_scores = {}
-        for idx in top_bm25_indices:
-            bm25_score = bm25_scores[idx] * bm25_weight
-            faiss_score = faiss_similarities[np.where(I[0] == idx)[0][0]] * faiss_weight if idx in I[0] else 0
-            combined_scores[idx] = bm25_score + faiss_score
+        combined_scores = {idx: bm25_scores[idx] * bm25_weight for idx in top_bm25_indices}
+        for idx, score in zip(I[0], faiss_similarities):
+            if idx in combined_scores:
+                combined_scores[idx] += score * faiss_weight
+            else:
+                combined_scores[idx] = score * faiss_weight
 
         # 임계값 적용 및 상위 k개의 결과 선택
         filtered_scores = {idx: score for idx, score in combined_scores.items() if score >= threshold}
         ranked_indices = sorted(filtered_scores, key=filtered_scores.get, reverse=True)
 
+        # 결과가 충분하지 않으면 임계값을 낮추어 추가 검색
+        while len(ranked_indices) < 5 and threshold > 0.1:
+            threshold -= 0.1
+            filtered_scores = {idx: score for idx, score in combined_scores.items() if score >= threshold}
+            ranked_indices = sorted(filtered_scores, key=filtered_scores.get, reverse=True)
+
+        # 선택된 결과가 5개 미만인 경우 추가적인 문서 선택
+        if len(ranked_indices) < 5:
+            additional_indices = [idx for idx in range(len(corpus)) if idx not in ranked_indices]
+            ranked_indices.extend(additional_indices[:5 - len(ranked_indices)])
+
         logging.info(f"최종 선택된 문서 개수: {len(ranked_indices)}")
 
         # 메타데이터 인덱스 생성
-
-        metadata_index = defaultdict(dict)
-        for meta in vector_store.metadata:
-            data_id = meta.get("data_id")
-            metadata_index[data_id]['link'] = meta.get("link", "")
-            metadata_index[data_id]['name'] = meta.get("name", "Unknown")
-            metadata_index[data_id]['img'] = meta.get("img")
-            metadata_index[data_id]['address'] = meta.get("address", "Unknown")
+        metadata_index = {meta.get("data_id"): {
+            'link': meta.get("link", ""),
+            'name': meta.get("name", "Unknown"),
+            'img': meta.get("img"),
+            'address': meta.get("address", "Unknown")
+        } for meta in vector_store.metadata}
 
         # 결과 수집 및 요약 생성
         seen = set()
@@ -144,7 +154,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
 
         start_time = time.time()
         tasks = []
-        
+
         for idx in ranked_indices:
             if idx < len(vector_store.metadata):
                 meta = vector_store.metadata[idx]
@@ -154,16 +164,11 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
                     continue
                 seen.add(data_id)
 
-                for m in vector_store.metadata:
-                    if m.get("data_id") == data_id:
-                        chunk_content = m.get("chunk_content", "")
-                        if chunk_content:
-                            combined_results[data_id].append(chunk_content)
+                chunk_content = meta.get("chunk_content", "")
+                if chunk_content:
+                    combined_results[data_id].append(chunk_content)
 
-                if len(combined_results) >= k:
-                    break
-
-        # 비동기 요약 생성
+        # 비동기 요약 생성 (모든 문서 요약을 병렬로 수행)
         for data_id, chunks in combined_results.items():
             full_content = " ".join(chunks)
 
@@ -189,11 +194,11 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
                 "link": link
             })
 
+        # 비동기 작업 병렬 실행
         summaries = await asyncio.gather(*tasks)
 
         for i, summary in enumerate(summaries):
             selected_results[i]['summary'] = summary
-
 
         end_time = time.time()
         logging.info(f"전체 요약 생성 소요 시간: {end_time - start_time:.2f}초")
@@ -217,6 +222,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
     except Exception as e:
         logging.error(f"검색 중 오류 발생: {str(e)}")
         raise
+
 
 def image_url_to_base64(image_url):
     response = requests.get(image_url)
