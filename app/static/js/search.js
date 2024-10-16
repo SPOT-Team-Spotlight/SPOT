@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const searchForm = document.getElementById('searchForm');
     const spinner = document.getElementById('spinner');
     const spinnerMessage = document.getElementById('spinnerMessage');
+    const video = document.getElementById('spinnerVideo');
 
     const messages = [
         "맛집 검색 중...",
@@ -26,6 +27,14 @@ document.addEventListener("DOMContentLoaded", function() {
     // 메시지 업데이트 함수
     function updateSpinnerMessage() {
         spinnerMessage.textContent = getRandomMessage();
+    }
+
+    //비디오 시작 시간을 랜덤하게 설정
+    function setRandomVideoStartTime() {   
+        if (video) {
+            const randomStartTime = Math.random() * video.duration;
+            video.currentTime = randomStartTime;
+        }
     }
 
     // 검색 폼 제출 이벤트 처리
@@ -76,6 +85,7 @@ document.addEventListener("DOMContentLoaded", function() {
         searchInput.value = searchTerm;
         spinner.style.display = 'flex';
         updateSpinnerMessage();
+        setRandomVideoStartTime(); 
         const messageInterval = setInterval(updateSpinnerMessage, 2000);
         searchForm.submit();
 
