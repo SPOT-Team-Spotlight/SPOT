@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
     // 주소를 위도와 경도로 변환하는 함수
     function getCoordinatesByAddress(address, callback) {
-        // 현재 호스트 주소를 감지하여 로컬 또는 IP 기반으로 설정
         const apiBaseUrl = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') 
                             ? 'http://127.0.0.1:8000' 
                             : `http://${window.location.hostname}:8000`;
@@ -12,10 +11,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (data.addresses && data.addresses.length > 0) {
                     const latitude = parseFloat(data.addresses[0].y);
                     const longitude = parseFloat(data.addresses[0].x);
-                    callback(latitude, longitude); // 콜백을 사용해 위도와 경도 전달
+                    callback(latitude, longitude);
                 } else {
                     console.error("주소를 찾을 수 없습니다.");
-                    data.address
                     callback(NaN, NaN);
                 }
             })
@@ -24,6 +22,31 @@ document.addEventListener("DOMContentLoaded", function() {
                 callback(NaN, NaN);
             });
     }
+
+    // 사용자의 현재 위치를 실시간으로 추적하는 함수
+    function trackUserLocation(updateCallback) {
+        if (navigator.geolocation) {
+            return navigator.geolocation.watchPosition(
+                (position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    updateCallback(latitude, longitude);
+                },
+                (error) => {
+                    console.error("사용자의 위치를 추적하는 데 실패했습니다.", error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 0,
+                    timeout: 5000
+                }
+            );
+        } else {
+            console.error("Geolocation은 이 브라우저에서 지원되지 않습니다.");
+            return null;
+        }
+    }
+
     // 슬라이더 관련 DOM 요소
     const sliderWrapper = document.getElementById('sliderWrapper');
     const prevBtn = document.getElementById('prevBtn');
@@ -32,6 +55,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 슬라이더 아이템 개수
     const totalItems = document.querySelectorAll('.slider-item').length;
+
+
+    // 사용자 위치 저장 변수
+    let userLatitude = NaN;
+    let userLongitude = NaN;
+
+    // 각 맵에 대한 정보를 저장할 객체
+    const mapInfo = {};
 
     // 슬라이드 이동 함수
     function moveSlider(index) {
@@ -58,7 +89,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 지도 렌더링 함수
     function renderMap(index) {
-
         console.log(`인덱스 ${index}에 대한 지도를 렌더링 시도 중`);
 
         const mapDivId = `map-${index}`;
@@ -67,16 +97,12 @@ document.addEventListener("DOMContentLoaded", function() {
         const sliderItem = sliderItems[index];
 
         if (index >= 0 && index < sliderItems.length) {
-            
             if (!mapElement || !sliderItem) {
                 console.error(`ID가 ${mapDivId}인 지도 요소를 찾을 수 없음`);
                 return;
             }
-        
-            if (mapElement.dataset.rendered !== "true") {
-                // 지도 이미 렌더링되었는지 확인 (중복 렌더링 방지)
-                mapElement.dataset.rendered = "true";
 
+            if (!mapInfo[index]) {
                 const address = sliderItem.dataset.address;
                 const name = sliderItem.querySelector("h2").innerText;
 
@@ -86,46 +112,105 @@ document.addEventListener("DOMContentLoaded", function() {
                     console.error("주소 정보가 없습니다.");
                     return;
                 }
-                // 지오코딩을 통해 주소로부터 위도와 경도를 가져와 지도 렌더링
+
+                showSpinner();
+
                 getCoordinatesByAddress(address, (latitude, longitude) => {
                     if (!isNaN(latitude) && !isNaN(longitude)) {
                         console.log(`위도: ${latitude}, 경도: ${longitude}`);
-                    
-                        // 지도 API를 사용해 지도 생성
+
                         const mapOptions = {
                             center: new naver.maps.LatLng(latitude, longitude),
                             zoom: 15
                         };
                         const map = new naver.maps.Map(mapElement, mapOptions);
 
-                        // 마커 추가
-                        const marker = new naver.maps.Marker({
+                        const storeMarker = new naver.maps.Marker({
                             position: new naver.maps.LatLng(latitude, longitude),
-                            map: map
+                            map: map,
+                            title: name
                         });
 
-                         // 지도 리사이즈 처리 (모바일에서 제대로 보이도록)
-                         window.addEventListener('resize', () => handleMapResize(map, latitude, longitude));
+                        mapInfo[index] = { map, storeMarker, latitude, longitude };
+                        //이거 지도클릭시 네이버 지도 링크로 가는건데 현재 검색된 식당의 고유ID가 없어서 그 주변 위치기반으로 이동됨.
+                        naver.maps.Event.addListener(map, 'click', function() {
+                            const naverMapUrl = `https://map.naver.com/v5/?c=${longitude},${latitude},15,0,0,0,dh`;
+                            window.open(naverMapUrl, '_blank');
+                        });
 
-                        // 가게 이름과 주소 표시 업데이트
-                        const mapContainer = mapElement.parentElement;
-                        let storeInfoElement = mapContainer.querySelector('.store-info');
+                        // // 지도 클릭 시 전체 화면으로 확대
+                        // naver.maps.Event.addListener(map, 'click', function() {
+                        //     openFullscreenMap(index);
+                        // });
 
-                        if(!storeInfoElement) {
-                            // 중복 방지를 위해 기존에 추가된 요소가 있는지 확인 후, 없을 때만 추가
-                            const mapInfoElement = document.createElement('div');
-                            mapInfoElement.classList.add('store-info');
-                            mapInfoElement.innerHTML = `<strong>${name}</strong><br>${address}`;
-                            mapElement.parentNode.insertBefore(mapInfoElement, mapElement.nextSibling);
-                        }
+                        // updateUserLocationOnMap(index);
+
+                        // 지도 리사이즈 처리
+                        window.addEventListener('resize', () => handleMapResize(map, latitude, longitude));
+
+                        // 가게 정보 표시 업데이트
+                        updateStoreInfo(mapElement, name, address);
+
+                        // 지도 범위 설정
+                        updateMapBounds(index);
                     } else {
                         console.error("올바른 좌표를 얻지 못했습니다. 기본 위치를 사용합니다.");
                     }
+
+                    hideSpinner();
                 });
+            } else {
+                // 이미 렌더링된 지도의 경우, 사용자 위치만 업데이트
+                updateUserLocationOnMap(index);
             }
         } else {
             console.error(`잘못된 인덱스: ${index}`);
         }
+    }
+
+    // 전체 화면 지도 열기
+    function openFullscreenMap(index) {
+        const fullscreenContainer = document.createElement('div');
+        fullscreenContainer.style.position = 'fixed';
+        fullscreenContainer.style.top = '0';
+        fullscreenContainer.style.left = '0';
+        fullscreenContainer.style.width = '100%';
+        fullscreenContainer.style.height = '100%';
+        fullscreenContainer.style.backgroundColor = 'white';
+        fullscreenContainer.style.zIndex = '1000';
+
+        const mapDiv = document.createElement('div');
+        mapDiv.style.width = '100%';
+        mapDiv.style.height = '100%';
+        fullscreenContainer.appendChild(mapDiv);
+
+        const closeButton = document.createElement('button');
+        closeButton.textContent = '닫기';
+        closeButton.style.position = 'absolute';
+        closeButton.style.top = '10px';
+        closeButton.style.right = '10px';
+        closeButton.style.zIndex = '1001';
+        fullscreenContainer.appendChild(closeButton);
+
+        document.body.appendChild(fullscreenContainer);
+
+        const { map, storeMarker, latitude, longitude } = mapInfo[index];
+        const fullscreenMap = new naver.maps.Map(mapDiv, {
+            center: map.getCenter(),
+            zoom: map.getZoom()
+        });
+
+        new naver.maps.Marker({
+            position: storeMarker.getPosition(),
+            map: fullscreenMap,
+            title: storeMarker.getTitle()
+        });
+
+        updateUserLocationOnMap(index, fullscreenMap);
+
+        closeButton.addEventListener('click', () => {
+            document.body.removeChild(fullscreenContainer);
+        });
     }
 
     // 지도 리사이즈 처리를 담당하는 함수
@@ -134,6 +219,94 @@ document.addEventListener("DOMContentLoaded", function() {
         map.setCenter(new naver.maps.LatLng(latitude, longitude));
     }
 
+    // 스피너 표시 함수
+    function showSpinner() {
+        const spinner = document.getElementById('spinner');
+        if (spinner) spinner.style.display = 'flex';
+    }
+
+    // 스피너 숨기기 함수
+    function hideSpinner() {
+        const spinner = document.getElementById('spinner');
+        if (spinner) spinner.style.display = 'none';
+    }
+
+    // 사용자 위치 업데이트 함수
+    function updateUserLocationOnMap(index, mapInstance = null) {
+        const map = mapInstance || mapInfo[index].map;
+        if (!map) return;
+
+        if (!isNaN(userLatitude) && !isNaN(userLongitude)) {
+            const userPosition = new naver.maps.LatLng(userLatitude, userLongitude);
+            
+            if (!mapInfo[index].userMarker) {
+                mapInfo[index].userMarker = new naver.maps.Marker({
+                    position: userPosition,
+                    map: map,
+                    icon: {
+                        content: '<div style="width: 20px; height: 20px; background-color: blue; border-radius: 50%; border: 2px solid white;"></div>',
+                        anchor: new naver.maps.Point(10, 10)
+                    },
+                    title: "내 위치"
+                });
+            } else {
+                mapInfo[index].userMarker.setPosition(userPosition);
+            }
+
+            updateMapBounds(index, mapInstance);
+        }
+    }
+
+    // 지도 범위 업데이트 함수
+    function updateMapBounds(index, mapInstance = null) {
+        const { map, storeMarker } = mapInfo[index];
+        const targetMap = mapInstance || map;
+        if (!targetMap || !storeMarker) return;
+
+        const bounds = new naver.maps.LatLngBounds();
+        bounds.extend(storeMarker.getPosition());
+        
+        if (!isNaN(userLatitude) && !isNaN(userLongitude)) {
+            bounds.extend(new naver.maps.LatLng(userLatitude, userLongitude));
+        }
+
+        targetMap.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 });
+    }
+
+    // 가게 정보 표시 업데이트 함수
+    function updateStoreInfo(mapElement, name, address) {
+        const mapContainer = mapElement.parentElement;
+        let storeInfoElement = mapContainer.querySelector('.store-info');
+
+        if(!storeInfoElement) {
+            storeInfoElement = document.createElement('div');
+            storeInfoElement.classList.add('store-info');
+            mapElement.parentNode.insertBefore(storeInfoElement, mapElement.nextSibling);
+        }
+
+        storeInfoElement.innerHTML = `<strong>${name}</strong><br>${address}`;
+    }
+
+    // 실시간으로 사용자의 위치를 추적하고 업데이트
+    const watchId = trackUserLocation((latitude, longitude) => {
+        userLatitude = latitude;
+        userLongitude = longitude;
+        console.log(`사용자 위치 업데이트: 위도 ${userLatitude}, 경도 ${userLongitude}`);
+
+        // 모든 렌더링된 지도에 사용자 위치 업데이트
+        Object.keys(mapInfo).forEach(index => {
+            updateUserLocationOnMap(parseInt(index));
+        });
+    });
+
+    // 페이지 언로드 시 위치 추적 중지
+    window.addEventListener('beforeunload', () => {
+        if (watchId !== null) {
+            navigator.geolocation.clearWatch(watchId);
+        }
+    });
+
+    // 네이버 지도 API 로드 확인 및 초기화
     function initMap() {
         if (typeof naver !== 'undefined' && naver.maps) {
             console.log("네이버 지도 API가 로드됨");
@@ -144,7 +317,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // 네이버 지도 API 로드 확인 및 초기화
     function checkNaverMapsAPI() {
         if (typeof naver !== 'undefined' && naver.maps) {
             initMap();
