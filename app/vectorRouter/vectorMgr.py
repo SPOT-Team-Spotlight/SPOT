@@ -72,7 +72,7 @@ def preprocess_search_input(search_input: str):
     return keywords
 
 # RAG(검색 + 생성) 기반 검색 함수 (비동기)
-async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.7, faiss_weight: float = 0.6, threshold: float = 0.7):
+async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.5, faiss_weight: float = 0.6, threshold: float = 0.6):
     if not search_input:
         raise EmptySearchQueryException()
 
@@ -129,7 +129,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
             filtered_scores = {idx: score for idx, score in combined_scores.items() if score >= current_threshold}
             ranked_indices = sorted(filtered_scores, key=filtered_scores.get, reverse=True)
 
-            # 임계값을 조정해서 더 많은 결과를 포함할 수 있도록 함 (0.01씩 줄이기)
+            # 임계값을 조정해서 더 많은 결과를 포함할 수 있도록 함 (0.05씩 줄이기)
             if len(filtered_scores) < k:
                 current_threshold -= 0.01
                 logging.info(f"임계값을 낮춥니다: {current_threshold:.2f} (현재 후보 개수: {len(filtered_scores)})")
@@ -220,8 +220,20 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
         for i, summary in enumerate(summaries):
             selected_results[i]['summary'] = summary
 
+
         end_time = time.time()
         logging.info(f"전체 요약 생성 소요 시간: {end_time - start_time:.2f}초")
+
+        # 결과 로깅 (image 필드 제외)
+        logged_results = {
+            "generated_response": "검색 결과 요약 생성 완료",
+            "results": [
+                {k: v for k, v in result.items() if k != "image"}
+                for result in selected_results
+            ]
+        }
+
+        logging.info("검색 결과: %s", logged_results)
 
         return {
             "generated_response": "검색 결과 요약 생성 완료",
@@ -249,6 +261,11 @@ if __name__ == "__main__":
     try:
         search_input = "강남역 햄버거"
         result = asyncio.run(search_with_rag(search_input, k=5))
-        print("검색 결과:", result)
+         # 이미지 데이터 제외한 결과만 출력
+        simplified_result = [
+            {k: v for k, v in res.items() if k != "image"}
+            for res in result["results"]
+        ]
+        print("검색 결과:", simplified_result)
     except Exception as e:
         print(f"검색 실행 중 오류 발생: {e}")
