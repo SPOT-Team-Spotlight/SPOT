@@ -134,20 +134,24 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
         # 5. BM25와 FAISS 점수 결합
         combined_scores = {}
 
+        # bm25의 상위권에 대해서 점수 계산
         for idx in top_bm25_indices:
-            combined_scores[idx] = bm25_scores[idx] * bm25_weight
+            bm25_score = bm25_scores[idx]
+            if idx in I[0]:
+                faiss_score = faiss_similarities[list(I[0]).index(idx)]
+                if bm25_score > 0 and faiss_score > 0:
+                    combined_scores[idx] = bm25_score * bm25_weight + faiss_score * faiss_weight
 
+        # FAISS에서 높은 점수를 받았지만 BM25의 상위 결과에 포함되지 않은 문서들을 처리
         for idx, doc_id in enumerate(I[0]):
-            if doc_id in combined_scores:
-                combined_scores[doc_id] += faiss_similarities[idx] * faiss_weight
-            else:
-                combined_scores[doc_id] = faiss_similarities[idx] * faiss_weight
-
-         # 결합된 점수가 0.5 이하인 경우만 필터링
-        filtered_indices = [idx for idx in combined_scores if combined_scores[idx] <= 0.438]
+            if doc_id not in combined_scores:
+                bm25_score = bm25_scores[doc_id] if doc_id < len(bm25_scores) else 0
+                faiss_score = faiss_similarities[idx]
+                if bm25_score > 0 and faiss_score > 0:
+                    combined_scores[doc_id] = bm25_score * bm25_weight + faiss_score * faiss_weight
 
         # 6. 결합된 점수로 상위 문서 선택 및 정렬
-        ranked_indices = sorted(filtered_indices, key=combined_scores.get, reverse=True)
+        ranked_indices = sorted(combined_scores, key=combined_scores.get, reverse=True)
         logging.info(f"결합된 후보 개수: {len(ranked_indices)}")
 
         # BM25와 FAISS 결합 후 결과 분석
@@ -186,6 +190,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
             if idx < len(vector_store.metadata):
                 meta = vector_store.metadata[idx]
                 data_id = meta.get("data_id")
+                name = meta.get("name")
 
                 if data_id in seen:
                     continue
@@ -202,6 +207,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
                     break
 
         logging.info(f"선택된 결과 수: {len(combined_results)}")
+        print(combined_results.items())
 
         # 8. 비동기 요약 생성
         selected_results = []
