@@ -103,7 +103,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
 
         if len(top_bm25_indices) == 0:
             raise NoSearchResultsException("BM25 검색에서 결과를 찾을 수 없습니다.")
-    
+        
         # 3. FAISS 검색
         embedding = get_openai_embedding(search_input)
         
@@ -113,6 +113,18 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
         # FAISS 검색 수행
         D, I = vector_store.search(embedding.reshape(1, -1), k=200)
         logging.info(f"FAISS 후보 개수: {len(I[0])}")
+
+        # FAISS 검색 결과 분석
+        print("FAISS 검색 결과 (상위 10개):")
+        for i in range(min(10, len(I[0]))):
+            idx = I[0][i]
+            distance = D[0][i]
+            meta = vector_store.metadata[idx]
+            print(f"인덱스: {idx}, 거리: {distance:.4f}")
+            print(f"  데이터 ID: {meta.get('data_id')}")
+            print(f"  이름: {meta.get('name')}")
+            print(f"  chunk_content: {meta.get('chunk_content')[:100]}...")  # 처음 100자만 출력
+            print()
 
         # FAISS 유사도 정규화
         faiss_similarities = 1 - D[0]
@@ -131,9 +143,30 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 0.
             else:
                 combined_scores[doc_id] = faiss_similarities[idx] * faiss_weight
 
+         # 결합된 점수가 0.5 이하인 경우만 필터링
+        filtered_indices = [idx for idx in combined_scores if combined_scores[idx] <= 0.438]
+
         # 6. 결합된 점수로 상위 문서 선택 및 정렬
-        ranked_indices = sorted(combined_scores, key=combined_scores.get, reverse=True)
+        ranked_indices = sorted(filtered_indices, key=combined_scores.get, reverse=True)
         logging.info(f"결합된 후보 개수: {len(ranked_indices)}")
+
+        # BM25와 FAISS 결합 후 결과 분석
+        print("BM25와 FAISS 결합 후 검색 결과 (상위 10개):")
+        for i, idx in enumerate(ranked_indices[:10]):
+            meta = vector_store.metadata[idx]
+            combined_score = combined_scores[idx]
+            bm25_score = bm25_scores[idx] if idx < len(bm25_scores) else 0
+            faiss_score = faiss_similarities[list(I[0]).index(idx)] if idx in I[0] else 0
+            
+            print(f"순위 {i+1}:")
+            print(f"  인덱스: {idx}")
+            print(f"  결합 점수: {combined_score:.4f}")
+            print(f"  BM25 점수: {bm25_score:.4f}")
+            print(f"  FAISS 점수: {faiss_score:.4f}")
+            print(f"  데이터 ID: {meta.get('data_id')}")
+            print(f"  이름: {meta.get('name')}")
+            print(f"  chunk_content: {meta.get('chunk_content')[:100]}...")  # 처음 100자만 출력
+            print()
 
         # 7. 미리 인덱싱한 메타데이터 사전 생성
         metadata_index = defaultdict(dict)  # metadata_index 정의
