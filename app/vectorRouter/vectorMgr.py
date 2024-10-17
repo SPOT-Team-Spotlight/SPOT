@@ -86,19 +86,19 @@ def preprocess_search_input(search_input: str):
     return filtered_keywords  # 전처리된 키워드 반환
 
 # RAG(검색 + 생성) 기반 검색 함수 (비동기)
-async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 1, faiss_weight: float = 1, threshold: float = 0.6):
+async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 1, faiss_weight: float = 1.5, threshold: float = 0.6):
     if not search_input:
         raise EmptySearchQueryException()  # 검색어가 없을 경우 예외 발생
 
     logging.info("검색을 시작합니다.")  # 검색 시작 로그 출력
-    
+
     try:
         keywords = preprocess_search_input(search_input)  # 검색어 전처리 및 NER 수행
         if not keywords:
             raise EmptySearchQueryException("유효한 검색 키워드가 없습니다.")  # 유효한 키워드가 없을 경우 예외 발생
-        
+
         logging.info(f"검색어 전처리 완료: {keywords}")  # 전처리 완료 로그 출력
-    
+
         # BM25 검색
         bm25_scores = np.zeros(len(corpus))  # BM25 점수를 저장할 배열 초기화
         for keyword in keywords:
@@ -109,29 +109,26 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 1,
         if np.max(bm25_scores) > 0:
             bm25_scores = bm25_scores / np.max(bm25_scores)  # 점수를 0~1 사이로 정규화
 
-        # 상위 K개의 문서만 선택
-        top_bm25_indices = np.argsort(bm25_scores)[-k:]  # BM25 점수가 높은 상위 K개의 문서 선택
-
         # FAISS 검색
         embedding = get_openai_embedding(search_input)  # 검색어 임베딩 생성
-        
+
         if vector_store.dim is None:
             raise EmptyVectorStoreException("FAISS 벡터 저장소가 초기화되지 않았습니다.")  # FAISS 벡터 저장소가 초기화되지 않았을 경우 예외 발생
 
-        D, I = vector_store.search(embedding.reshape(1, -1), k=k)  # FAISS 검색 수행
-
+        D, I = vector_store.search(embedding.reshape(1, -1), k=k*3)  # FAISS 검색 수행 (k*n n값을 조정하여 후보 갯수 설정해야함 너무많으면 느림.)
+        
         faiss_similarities = 1 - D[0]  # FAISS 유사도 계산
         if np.max(faiss_similarities) > 0:
             faiss_similarities = faiss_similarities / np.max(faiss_similarities)  # 유사도 정규화
 
         # BM25와 FAISS 점수 결합 (가중치 조정)
         combined_scores = {}
-        for idx in top_bm25_indices:
+        for idx in range(len(corpus)):
             bm25_score = bm25_scores[idx] * bm25_weight  # BM25 점수에 가중치 부여
             faiss_score = faiss_similarities[np.where(I[0] == idx)[0][0]] * faiss_weight if idx in I[0] else 0  # FAISS 점수에 가중치 부여
             combined_scores[idx] = bm25_score + faiss_score  # 두 점수를 합산
 
-        # 임계값 적용 및 상위 k개의 결과 선택
+        # 임계값 적용 및 상위 문서 정렬
         filtered_scores = {idx: score for idx, score in combined_scores.items() if score >= threshold}  # 임계값 이상인 문서만 선택
         ranked_indices = sorted(filtered_scores, key=filtered_scores.get, reverse=True)  # 점수에 따라 문서 정렬
 
@@ -154,11 +151,17 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 1,
 
         start_time = time.time()
         tasks = []
-        
+
         for idx in ranked_indices:
             if idx < len(vector_store.metadata):
                 meta = vector_store.metadata[idx]
                 data_id = meta.get("data_id")
+                name = meta.get("name", "Unknown")
+
+                if name in unique_names:
+                    continue  # 이미 처리한 이름은 건너뜀
+
+                unique_names.add(name)  # 이름 추가
 
                 if data_id in seen:
                     continue  # 이미 처리한 데이터는 건너뜀
@@ -183,11 +186,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 1,
             address = meta_info.get('address', 'Unknown')
             img = meta_info.get('img')
 
-            if name in unique_names:
-                continue  # 중복된 이름은 건너뜀
-            unique_names.add(name)
-
-            task = generate_gpt_response(name, full_content)  # GPT 요약 요청
+            task = generate_gpt_response(name, full_content,search_input)  # GPT 요약 요청
             tasks.append(task)
 
             selected_results.append({
@@ -215,6 +214,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 1,
     except Exception as e:
         logging.error(f"검색 중 오류 발생: {str(e)}")  # 예외 발생 시 로그 출력
         raise  # 예외 재발생
+
 
 # 이미지 URL을 base64로 변환하는 함수
 def image_url_to_base64(image_url):

@@ -57,4 +57,3 @@ class FaissVectorStore:
         # 검색 수행
         distances, indices = self.index.search(query_vector, k)
         return distances, indices
-

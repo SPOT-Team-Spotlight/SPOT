@@ -8,7 +8,7 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # 비동기 OpenAI GPT 요약 생성 함수
-async def generate_gpt_response(name: str, full_content: str):
+async def generate_gpt_response(name: str, full_content: str, search_input:str):
     """
     OpenAI를 통해 요약된 정보를 비동기적으로 반환하는 함수.
     중복된 정보 없이 새로운 정보를 생성하는 것을 목표로 함.
@@ -38,15 +38,17 @@ async def generate_gpt_response(name: str, full_content: str):
                             "content": f"""
                             가게 이름: {name}
                             가게 설명: {full_content}
+                            사용자 요청: {search_input}
                     대표 메뉴: 가게의 인기 메뉴를 강조하세요.\n
                     분위기: 가게의 분위기를 간결하게 설명하세요 (예: 로맨틱한, 캐주얼한, 가족 친화적인 등).\n
                     차별점: 이 가게만의 특별한 특징을 강조하세요.\n
-                    
+                    사용자의 요청을 고려하여 이 식당을 왜 추천했는지,어떤이유로 이 식당을 추천했는지 설명해주세요.
                     # Output Format
                     {{
                         "대표메뉴": "",
                         "분위기": "",
-                        "차별점": ""
+                        "차별점": "",
+                        "추천한 이유": ""
                     }}
                     """
                         }
