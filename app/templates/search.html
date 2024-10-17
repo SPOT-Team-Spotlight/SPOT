@@ -4,37 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPOT 검색</title>
-    <link rel="stylesheet" href="/static/css/search.css"> <!-- CSS 파일 연결 -->
+    
+    <!-- Swiper CSS 추가 -->
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/search.css">
 </head>
 <body>
     <header>
         <img src="/static/logo.png" alt="사이트 로고" width="80" height="80">
-        <h1><img src="/static/foot.png" width="40" height="40">오늘 가고 싶은 SPOT은?</h1>
+        <h1><img src="/static/foot.png" width="30" height="30">오늘 가고 싶은 SPOT은?</h1>
     </header>
 
     <!-- 검색 폼 -->
     <form id="searchForm" method="POST" action="/search/">
-        <input type="text" id="searchInput" name="search_input" placeholder="특별한 맛집을 문장으로 검색해보세요.">
-        <button type="submit">검색</button><br/>
+        <input type="text" id="searchInput" name="search_input" placeholder="검색어와 지역을 입력하세요 (예: 서울 맛집)" required>
+
+        <!-- 추천 슬라이더 추가 -->
+        <div class="swiper-container">
+            <div class="swiper-wrapper" id="swiperWrapper">
+                <!-- 슬라이드 아이템은 JavaScript에서 동적으로 추가됩니다 -->
+            </div>
+            <!-- 페이지 네이션
+            <div class="swiper-pagination"></div> -->
+        </div>
+
+        <button type="submit">검색</button>
         <button type="button" id="voiceSearchButton">🎤 음성 검색</button>
     </form>
-
-    <!-- 검색 중 지원하는 스피너 -->
-    <div id="spinner" style="display: none;">
-        <video id="spinnerVideo" autoplay loop muted playsinline>
-            <source src="/static/spiner_background.mp4" type="video/mp4">
-            배경을 지원하는 브라우저가 아닙니다 
-        </video>
-        <div class="spinner-container">
-            <div class="spinner"></div>
-            <p id="spinnerMessage">검색 중...</p>
-        </div>
+   <!-- 검색 중 지원하는 스피너 -->
+   <div id="spinner" style="display: none;">
+    <video id="spinnerVideo" autoplay loop muted playsinline>
+        <source src="/static/spiner_background.mp4" type="video/mp4">
+        배경을 지원하는 브라우저가 아닙니다 
+    </video>
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <p id="spinnerMessage">검색 중...</p>
     </div>
+</div>
 
-    <!-- 추천 문장 카드 -->
-    <div id="cardContainer"></div>
-
-    <script src="/static/js/recommendations.js"></script> 
-    <script src="/static/js/search.js"></script> 
+    <!-- Swiper JS 추가 -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script src="/static/js/recommendations.js" defer></script>
+    <script src="/static/js/search.js" defer></script> 
 </body>
 </html>

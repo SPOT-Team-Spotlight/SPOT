@@ -1,0 +1,73 @@
+{
+    "width": 600,
+    "height": 400,
+    "x": 100,
+    "y": 100,
+    "font_family": "Arial",
+    "font_size": 10,
+    "theme": "arc",
+    "button_style": "default",
+    "vdb_creator": {
+        "width": 600,
+        "height": 603,
+        "x": 1047,
+        "y": 230,
+        "crawling": {
+            "region": "강남역",
+            "keyword": "아구찜 내돈내산",
+            "mode": "데이터 수집 모드(100)",
+            "recent_regions": [
+                "강남역"
+            ],
+            "recent_keywords": [
+                "아구찜 내돈내산",
+                "애플파이 내돈내산",
+                "물회 내돈내산",
+                "문어숙회 내돈내산",
+                "커피 내돈내산"
+            ]
+        },
+        "preprocessing": {
+            "embedding_model_type": "OpenAI",
+            "embedding_model_version": "text-embedding-3-small",
+            "chunk_size": "150",
+            "overlap": "30"
+        }
+    },
+    "vdb_selector": {
+        "width": 400,
+        "height": 300,
+        "x": 200,
+        "y": 200
+    },
+    "vdb_retriever": {
+        "width": 400,
+        "height": 300,
+        "x": 250,
+        "y": 250
+    },
+    "vdb_merge": {
+        "width": 400,
+        "height": 300,
+        "x": 250,
+        "y": 250
+    },
+    "api_key": {
+        "width": 500,
+        "height": 400,
+        "x": 300,
+        "y": 300
+    },
+    "settings": {
+        "width": 300,
+        "height": 250,
+        "x": 350,
+        "y": 350
+    },
+    "application": {
+        "width": 600,
+        "height": 420,
+        "x": 6,
+        "y": 243
+    }
+}

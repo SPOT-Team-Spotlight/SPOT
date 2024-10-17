@@ -1,84 +1,132 @@
 /* 기본 스타일 */
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Nanum Gothic', Arial, sans-serif;
     margin: 0;
     padding: 0;
+    text-align: center;
     color: #333;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    background-color: white;
+    background-color: #f5f5f5;
 }
 
 header {
+    width: 100%;
+    padding: 20px 0;
+    background-color: #ffffff;
     display: flex;
-    flex-direction: column;
-    align-items: center; /* 로고와 제목을 중앙에 정렬 */
-    margin-top: 20px;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.logo {
-    width: 80px;
-    height: 80px;
+header img {
     margin-bottom: 10px;
 }
 
-
-
-
-
+main {
+    padding: 20px;
+}
 
 /* 슬라이드 컨테이너 */
 .slider-container {
     width: 100%;
-    max-width: 900px; /* 가로 폭 확대 */
+    max-width: 900px;
     overflow: hidden;
     position: relative;
     margin: 20px auto;
 }
 
-/* 슬라이드 목록 */
+/* 슬라이드 래퍼 */
 .slider-wrapper {
     display: flex;
+    flex-wrap: nowrap;
     transition: transform 0.3s ease-in-out;
-    width: 100%;
 }
 
 /* 슬라이드 아이템 */
 .slider-item {
-    min-width: 100%;
+    flex: 0 0 100%;
     box-sizing: border-box;
-    padding: 30px; /* 여백 확대 */
+    padding: 20px;
     background-color: #f0f8ff;
     border: 1px solid #b3e5fc;
     border-radius: 10px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     margin: 10px 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 아이템 내용 레이아웃 */
+.item-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* 아이템 헤더 */
+.item-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.item-header h2 {
+    margin: 0 0 10px 0;
+    font-size: 1.5rem;
+}
+
+/* 아이템 이미지 */
+.item-image {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 10px;
+    aspect-ratio: 1 / 1; /* 1:1 비율 유지 */
+    position: relative; /* 자식 요소의 절대 위치 설정을 위해 필요 */
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* 텍스트 컨테이너 */
+.item-text {
+    margin-bottom: 20px;
+    text-align: left;
+    width: 100%;
 }
 
 /* 지도 컨테이너 스타일 */
 .map-container {
     width: 100%;
-    max-width: 500px; /* 최대 너비를 제한하여 지도 크기를 일정하게 유지 */
-    margin: 20px auto; /* 상하 여백을 추가하고 가운데 정렬 */
+    max-width: 500px;
+    margin: 20px auto;
     padding: 10px;
-    box-sizing: border-box; /* 패딩을 포함한 박스 크기 설정 */
-    background-color: #f8f8f8; /* 약간의 배경색 추가 */
-    border: 1px solid #b3e5fc; /* 테두리 색상 설정 */
-    border-radius: 10px; /* 둥근 모서리 추가 */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
-    text-align: center; /* 컨테이너 내 콘텐츠를 가운데 정렬 */
+    background-color: #f8f8f8;
+    border: 1px solid #b3e5fc;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
-/* 지도 요소 */
 .map {
     width: 100%;
-    max-width: 450px; /* 최대 너비 제한 추가 */
+    max-width: 450px;
     height: 300px;
     border-radius: 10px;
-    margin: 0 auto; /* 지도의 좌우 중앙 정렬 */
+    margin: 0 auto;
 }
+
 /* 가게 정보 스타일 */
 .store-info {
     text-align: center;
@@ -87,131 +135,201 @@ header {
     color: #333;
 }
 
-/* 슬라이드 내 버튼 */
+/* 버튼 박스 */
+.button-box {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+    padding: 10px 0;
+    width: 100%;
+}
+
+.button-box .link-button,
+.button-box .button {
+    background-color: #0288d1;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 5px;
+    width: 48%;
+    transition: background-color 0.3s ease;
+}
+
+.button-box .link-button:hover,
+.button-box .button:hover {
+    background-color: #0277bd;
+}
+
+/* 슬라이드 이동 버튼 */
 .slider-button {
-    position: absolute;
+    position: fixed;
     top: 50%;
     transform: translateY(-50%);
-    background-color: rgba(0, 136, 209, 0.7); /* 하늘색 버튼 */
+    background-color: rgba(0, 136, 209, 0.7);
     color: white;
     border: none;
     padding: 15px;
     cursor: pointer;
     font-size: 1.5rem;
     border-radius: 50%;
+    z-index: 10;
 }
 
-.slider-button.prev { left: 10px; }
-.slider-button.next { right: 10px; }
-
-/* 아이템 내용 레이아웃 */
-.item-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center; /* 중앙 정렬 */
+.slider-button.prev {
+    left: 10px;
 }
 
-/* 아이템 헤더 (제목 + 이미지) */
-.item-header {
-    display: flex;
-    flex-direction: column; /* 이미지와 제목을 세로로 정렬 */
-    align-items: center;
-    margin-bottom: 20px;
+.slider-button.next {
+    right: 10px;
 }
 
-/* 제목 스타일 */
-.item-header h4 {
-    margin: 10px 0;
-    text-align: center;
-    font-size: 1.8rem;
-    color: #01579b;
-}
+/* 반응형 디자인 */
 
-/* 이미지 컨테이너 */
-.item-image {
-    width: 180px; /* 이미지 크기 확대 */
-    height: 180px;
-    margin-bottom: 20px;
-}
-
-.item-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%; /* 원형 이미지 */
-}
-
-/* 텍스트 컨테이너 */
-.item-text {
-    flex: 1;
-    text-align: center;
-    width: 100%; /* 텍스트 크기 확대 */
-    max-width: 700px; /* 가로 폭 제한 */
-}
-
-.similarity {
-    font-weight: bold;
-    color: #0288d1;
-    margin-bottom: 10px;
-}
-
-.summary {
-    margin-bottom: 20px;
-    font-size: 1.1rem;
-    color: #333;
-}
-
-/* 버튼 스타일 */
-.link-button, .button {
-    display: inline-block;
-    background-color: #0288d1; /* 하늘색 버튼 */
-    color: white;
-    padding: 12px 25px;
-    text-align: center;
-    text-decoration: none;
-    font-size: 16px;
-    border-radius: 5px;
-    margin-top: 10px;
-}
-
-.link-button:hover, .button:hover {
-    background-color: #0277bd;
-}
-
-@media (max-width: 600px) {
+/* 태블릿 스타일 (769px ~ 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
     .slider-item {
-        min-width: 90%;
-        margin: 0 auto; /* 모바일에서 슬라이더 아이템을 중앙에 배치 */
-        padding: 20px; /* 모바일에서 여백 축소 */
+        padding: 15px;
     }
 
-    .item-header h4 {
-        font-size: 1.5rem; /* 모바일에서 제목 크기 축소 */
+    .item-header h2 {
+        font-size: 1.3rem;
     }
 
     .item-image {
-        width: 140px; /* 모바일에서 이미지 크기 축소 */
-        height: 140px;
-    }
-
-    .item-text {
-        max-width: 100%;
+        max-width: 250px;
     }
 
     .map-container {
-        width: 100%; /* 모바일에서 지도의 너비를 부모 컨테이너에 맞춤 */
-        padding: 5px; /* 모바일에서 패딩 축소 */
-        margin: 10px auto; /* 모바일에서 상하 좌우 여백을 주어 중앙에 배치 */
+        padding: 8px;
+        margin: 15px auto;
     }
 
     .map {
-        width: 100%; /* 모바일에서 지도의 너비를 가로 전체에 맞춤 */
-        height: 200px; /* 모바일에서 지도의 높이 축소 */
-        margin: 0 auto; /* 지도의 좌우 중앙 정렬 */
+        height: 250px;
     }
 
     .store-info {
-        font-size: 0.9rem; /* 모바일 환경에서 가게 정보 크기 조정 */
+        font-size: 0.95rem;
+    }
+
+    .button-box {
+        flex-direction: row;
+    }
+
+    .button-box .link-button,
+    .button-box .button {
+        width: 48%;
+        margin-bottom: 0;
+    }
+
+    .slider-button {
+        padding: 12px;
+        font-size: 1.3rem;
     }
 }
+
+/* 모바일 스타일 (481px ~ 768px) */
+@media (max-width: 768px) and (min-width: 481px) {
+    .slider-item {
+        padding: 10px;
+    }
+
+    .item-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .item-image {
+        max-width: 200px;
+    }
+
+    .map-container {
+        padding: 5px;
+        margin: 10px auto;
+    }
+
+    .map {
+        height: 200px;
+    }
+
+    .store-info {
+        font-size: 0.9rem;
+    }
+
+    .button-box {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .button-box .link-button,
+    .button-box .button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .slider-button {
+        padding: 10px;
+        font-size: 1.2rem;
+    }
+
+    .slider-container {
+        max-width: 100%;
+    }
+}
+
+/* 작은 모바일 스타일 (max-width: 480px) */
+@media (max-width: 480px) {
+    .slider-item {
+        padding: 8px;
+    }
+
+    .item-header h2 {
+        font-size: 1rem;
+    }
+
+    .item-image {
+        max-width: 150px;
+    }
+
+    .map-container {
+        padding: 3px;
+        margin: 8px auto;
+    }
+
+    .map {
+        height: 150px;
+    }
+
+    .store-info {
+        font-size: 0.85rem;
+    }
+
+    .button-box {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .button-box .link-button,
+    .button-box .button {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .slider-button {
+        padding: 8px;
+        font-size: 1rem;
+    }
+
+    .swiper-container {
+        width: 100%;
+        height: 200px;
+    }
+
+    .swiper-slide {
+        height: 180px;
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+

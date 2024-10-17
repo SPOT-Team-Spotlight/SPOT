@@ -1,4 +1,8 @@
 /* 기본 스타일 */
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Nanum Gothic', Arial, sans-serif;
     margin: 0;
@@ -9,26 +13,79 @@ body {
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
+    background-color: #f5f5f5;
+}
+
+header {
+    width: 100%;
+    padding: 20px 0;
+    background-color: #ffffff;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+header img {
+    margin-bottom: 10px;
 }
 
 h1 {
-    color: #01579b;
-    margin-top: 30px;
-    font-size: 2.5rem;
+    color: #333;
+    margin: 10px 0;
+    font-size: 2rem;
     font-weight: 700;
+}
+
+/* Swiper 슬라이더 스타일 */
+.swiper-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 20px auto;
+    overflow: hidden;
+}
+
+.swiper-slide {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-size: 0.95rem;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    height: 140px;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+    color: #0288d1;
+}
+
+.swiper-pagination-bullet {
+    background: #0288d1;
+}
+
+.swiper-pagination-bullet-active {
+    background: #01579b;
 }
 
 /* 검색 폼 */
 #searchForm {
     background-color: #ffffff;
-    padding: 20px;
+    padding: 25px 20px;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    max-width: 450px;
-    width: 100%;
+    align-items: stretch;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 90%;
+    margin-top: 30px;
+    min-height: 400px;
 }
 
 #searchInput {
@@ -36,9 +93,15 @@ h1 {
     width: 100%;
     margin: 10px 0;
     border: 1px solid #b0bec5;
-    border-radius: 6px;
-    font-size: 1.1rem;
+    border-radius: 8px;
+    font-size: 1rem;
     color: #37474f;
+    transition: border-color 0.3s ease;
+}
+
+#searchInput:focus {
+    border-color: #0288d1;
+    outline: none;
 }
 
 button {
@@ -48,77 +111,45 @@ button {
     padding: 14px 25px;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: bold;
     width: 100%;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 button:hover {
     background-color: #0277bd;
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
 }
 
-/* 추천 문장 카드 스타일 */
-#cardContainer {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    flex-wrap: nowrap;
-    gap: 10px;
-    margin-top: 20px;
-    max-width: 100%;
-    padding: 0 15px; /* 좌우 여백 추가 */
-    overflow-x: auto;
+button:active {
+    transform: translateY(0);
 }
 
-#cardContainer .card {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: 200px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+#voiceSearchButton {
+    margin-top: 10px;
+    background-color: #66bb6a;
 }
 
-#cardContainer .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
-
-#cardContainer .icon {
-    font-size: 2.0rem;
-    margin-bottom: 15px;
-    color: #37474f;
+#voiceSearchButton:hover {
+    background-color: #43a047;
 }
 
 /* 스피너 스타일 */
-.spinner-container {
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: rgba(255, 255, 255, 0.8); /* 반투명한 배경 */
-    width: 300px; 
-    height: 200px;
-}
-
 #spinner {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    display: flex;
+    display: none; /* 기본적으로 숨김 */
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    overflow: hidden; /* 비디오가 컨테이너를 벗어나지 않도록 */
+    overflow: hidden;
 }
 
 #spinnerVideo {
@@ -130,28 +161,19 @@ button:hover {
     width: auto;
     height: auto;
     transform: translateX(-50%) translateY(-50%);
-    z-index: -1; /* 비디오를 다른 요소들 뒤에 배치 */
-}
-
-.spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #0288d1;
-    border-radius: 50%;
-    width: 100px;
-    height: 100px;
-    animation: spin 1s linear infinite;
+    z-index: -1;
 }
 
 .spinner-container {
     padding: 40px;
     border-radius: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.8); /* 반투명한 배경 */
-    width: 300px; 
-    height: 200px;
+    background-color: rgba(255, 255, 255, 0.8);
+    width: 300px;
+    height: 300px;
 }
 
 .spinner {
@@ -170,9 +192,115 @@ button:hover {
 
 #spinner p {
     margin-top: 20px;
-    font-size: 1rem; /* 글자 크기 조정 */
+    font-size: 1rem;
     color: #333;
     font-weight: bold;
-    max-width: 250px; /* 텍스트 최대 너비 설정 */
-    overflow-wrap: break-word; /* 긴 단어 줄바꿈 */
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) and (min-width: 769px) {
+    /* 태블릿 스타일 */
+    #searchForm {
+        max-width: 600px;
+        padding: 20px 25px;
+    }
+
+    h1 {
+        font-size: 2.2rem;
+    }
+
+    #searchInput {
+        font-size: 1.05rem;
+    }
+
+    button {
+        font-size: 1.05rem;
+    }
+
+    .swiper-container {
+        max-width: 600px;
+    }
+
+    .swiper-slide {
+        font-size: 1rem;
+        padding: 20px;
+    }
+}
+
+@media (max-width: 768px) and (min-width: 481px) {
+    /* 모바일 스타일 */
+    #searchForm {
+        max-width: 90%;
+        padding: 20px 15px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    #searchInput {
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+
+    .swiper-container {
+        max-width: 100%;
+        width: 95%;
+    }
+
+    .swiper-slide {
+        font-size: 0.95rem;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* 작은 모바일 스타일 */
+    header img {
+        width: 60px;
+        height: 60px;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+    }
+
+    #searchForm {
+        padding: 15px 10px;
+        min-height: 300px;
+    }
+
+    #searchInput {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    button {
+        padding: 10px 18px;
+        font-size: 0.95rem;
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border-width: 3px;
+    }
+
+    #spinner p {
+        font-size: 0.9rem;
+    }
+
+    .swiper-container {
+        width: 100%;
+    }
+
+    .swiper-slide {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
 }

@@ -9,17 +9,19 @@
 </head>
 <body>
     <header>
+        <!-- 사이트 로고 -->
         <img src="/static/logo.png" alt="사이트 로고" width="80" height="80">
     </header>
-    
+
     <main role="main">
-        <b>"{{ search_input }}" 검색 결과 </b>
-        
+
         <div class="slider-container">
             <div id="sliderWrapper" class="slider-wrapper">
+                <!-- 검색 결과 슬라이드 반복 -->
                 {% for result in results %}
                 <div class="slider-item" data-index="{{ loop.index0 }}" data-address="{{ result.address }}">
                     <div class="item-content">
+                        <!-- 가게 이름과 이미지 -->
                         <div class="item-header">
                             <h2>{{ result.name }}</h2>
                             <div class="item-image">
@@ -30,32 +32,34 @@
                                 {% endif %}
                             </div>
                         </div>
+                        <!-- 텍스트 내용 -->
                         <div class="item-text">
                             <p class="summary">{{ result.summary | safe }}</p>
-                            <p class="address">주소: {{ result.address }}</p>
-                            <a href="{{ result.link }}" class="link-button" target="_blank">블로그로 이동</a>
-                            <a href="/" class="button">새로운 검색하기</a>
                         </div>
-                        
+                        <!-- 지도와 가게 정보 및 버튼 -->
                         <div id="map-container-{{ loop.index0 }}" class="map-container">
                             <div id="map-{{ loop.index0 }}" class="map"></div>
                             <div class="store-info">
                                 <strong>{{ result.name }}</strong><br>
                                 <span>{{ result.address }}</span>
                             </div>
+                            
+                        </div>
+                        <div class="button-box">
+                            <a href="{{ result.link }}" class="link-button" target="_blank">블로그로 이동</a>
+                            <a href="/" class="button">새로운 검색하기</a>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
+            <!-- 슬라이드 넘기는 버튼 -->
             <button id="prevBtn" class="slider-button prev">‹</button>
             <button id="nextBtn" class="slider-button next">›</button>
         </div>
-    
-        
     </main>
 
-    <script src="/static/js/results.js"></script> 
+    <script src="/static/js/results.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             console.log("DOMContentLoaded 이벤트 발생");
