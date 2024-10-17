@@ -272,6 +272,3 @@ if __name__ == "__main__":
         print("검색 결과:", simplified_result)
     except Exception as e:
         print(f"검색 실행 중 오류 발생: {e}")
-
-
-        
