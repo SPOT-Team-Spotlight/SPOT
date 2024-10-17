@@ -38,7 +38,27 @@ async def generate_gpt_response(name: str, full_content: str):
                 분위기: 가게의 분위기를 간결하게 설명하세요 (예: 로맨틱한, 캐주얼한, 가족 친화적인 등).\n
                 차별점: 이 가게만의 특별한 특징을 강조하세요.\n
                 최대 300자로 요약을 간결하게 작성하세요.
-                """}
+                """},
+                '''
+                {
+                    "
+                        # task
+                        - 사용자가 가게를 빠르게 이해할 수 있도록 간결하고 명확해야 합니다.
+                        - output format 형태로 출력해주세요.
+                        - output format에 해당되는 내용이 없는 경우 null을 반환해주세요.
+
+                        # policy
+                        - 300자 내로 요약해주세요.
+
+                        # output format
+                        {
+                            "대표메뉴": "",
+                            "분위기": "",
+                            "차별점": ""
+                        }
+                    "
+                }
+                '''
             ],
             "temperature": 0.7,
             "max_tokens": 200,
