@@ -24,9 +24,9 @@ async def generate_gpt_response(name: str, full_content: str):
             "model": "gpt-4o-mini",
             "messages": [
                 {"role": "system", "content": (
-                    "당신은 한국의 맛집 전문가입니다. "
-                    "사용자가 입력한 문장이나 단어를 바탕으로 맛집을 찾아주는 것이 목표입니다. "
-                    "사용자가 입력한 음식 이름에 맞는 맛집을 찾아줘야 합니다."
+                    "당신은 한국의 **맛집 전문가**입니다. "
+                    "사용자가 입력한 **문장**이나 **단어**를 바탕으로 맛집을 찾아주는 것이 목표입니다. "
+                    "사용자가 입력한 **음식 이름**에 맞는 맛집을 찾아줘야 합니다."
                     "요약은 사용자가 가게를 빠르게 이해할 수 있도록 간결하고 명확해야 합니다. "
                     "존댓말을 써서 예의바르고 친절한 말투로 답변해주세요."
                 )},
@@ -40,7 +40,7 @@ async def generate_gpt_response(name: str, full_content: str):
                 최대 300자로 요약을 간결하게 작성하세요.
                 """}
             ],
-            "temperature": 0.7,
+            "temperature": 0,
             "max_tokens": 200,
             "top_p": 1,
             "frequency_penalty": 0.5,

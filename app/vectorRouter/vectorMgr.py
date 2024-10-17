@@ -74,7 +74,7 @@ def preprocess_search_input(search_input: str):
 
 # RAG(검색 + 생성) 기반 검색 함수 (비동기)
 
-async def search_with_rag(search_input: str, k: int = 7, bm25_weight: float = 0.8, faiss_weight: float = 0.5, threshold: float = 0.5):
+async def search_with_rag(search_input: str, k: int = 7, bm25_weight: float = 1, faiss_weight: float = 1, threshold: float = 0.5):
     if not search_input:
         raise EmptySearchQueryException()
 

@@ -139,11 +139,11 @@ document.addEventListener("DOMContentLoaded", function() {
                         });
 
                         // // 지도 클릭 시 전체 화면으로 확대
-                        // naver.maps.Event.addListener(map, 'click', function() {
-                        //     openFullscreenMap(index);
-                        // });
+                        naver.maps.Event.addListener(map, 'click', function() {
+                            openFullscreenMap(index);
+                        });
 
-                        // updateUserLocationOnMap(index);
+                        updateUserLocationOnMap(index);
 
                         // 지도 리사이즈 처리
                         window.addEventListener('resize', () => handleMapResize(map, latitude, longitude));
