@@ -56,13 +56,15 @@ document.addEventListener("DOMContentLoaded", function() {
     // 슬라이더 아이템 개수
     const totalItems = document.querySelectorAll('.slider-item').length;
 
-
     // 사용자 위치 저장 변수
     let userLatitude = NaN;
     let userLongitude = NaN;
 
     // 각 맵에 대한 정보를 저장할 객체
     const mapInfo = {};
+
+    // 확대된 지도에 대한 정보를 저장할 객체
+    const mapInfoFullscreen = {};
 
     // 슬라이드 이동 함수
     function moveSlider(index) {
@@ -132,21 +134,20 @@ document.addEventListener("DOMContentLoaded", function() {
                         });
 
                         mapInfo[index] = { map, storeMarker, latitude, longitude };
-                        //이거 지도클릭시 네이버 지도 링크로 가는건데 현재 검색된 식당의 고유ID가 없어서 그 주변 위치기반으로 이동됨.
+                        // 지도 클릭 시 전체 화면으로 확대
                         naver.maps.Event.addListener(map, 'click', function() {
-                            const naverMapUrl = `https://map.naver.com/v5/?c=${longitude},${latitude},15,0,0,0,dh`;
-                            window.open(naverMapUrl, '_blank');
+                            openFullscreenMap(index);
                         });
 
                         // // 지도 클릭 시 전체 화면으로 확대
                         naver.maps.Event.addListener(map, 'click', function() {
                             openFullscreenMap(index);
                         });
-
+                        
                         updateUserLocationOnMap(index);
 
                         // 지도 리사이즈 처리
-                        window.addEventListener('resize', () => handleMapResize(map, latitude, longitude));
+                        //window.addEventListener('resize', () => handleMapResize(map, latitude, longitude));
 
                         // 가게 정보 표시 업데이트
                         updateStoreInfo(mapElement, name, address);
@@ -178,12 +179,12 @@ document.addEventListener("DOMContentLoaded", function() {
         fullscreenContainer.style.height = '100%';
         fullscreenContainer.style.backgroundColor = 'white';
         fullscreenContainer.style.zIndex = '1000';
-
+    
         const mapDiv = document.createElement('div');
         mapDiv.style.width = '100%';
         mapDiv.style.height = '100%';
         fullscreenContainer.appendChild(mapDiv);
-
+    
         const closeButton = document.createElement('button');
         closeButton.textContent = '닫기';
         closeButton.style.position = 'absolute';
@@ -191,33 +192,48 @@ document.addEventListener("DOMContentLoaded", function() {
         closeButton.style.right = '10px';
         closeButton.style.zIndex = '1001';
         fullscreenContainer.appendChild(closeButton);
-
+    
         document.body.appendChild(fullscreenContainer);
-
+    
         const { map, storeMarker, latitude, longitude } = mapInfo[index];
         const fullscreenMap = new naver.maps.Map(mapDiv, {
             center: map.getCenter(),
             zoom: map.getZoom()
         });
-
+    
+        // 가게 위치 마커 추가
         new naver.maps.Marker({
             position: storeMarker.getPosition(),
             map: fullscreenMap,
             title: storeMarker.getTitle()
         });
-
-        updateUserLocationOnMap(index, fullscreenMap);
-
+    
+        // 사용자 실시간 위치 업데이트
+        const userMarker = new naver.maps.Marker({
+            position: new naver.maps.LatLng(userLatitude, userLongitude),
+            map: fullscreenMap,
+            icon: {
+                content: '<div style="width: 20px; height: 20px; background-color: blue; border-radius: 50%; border: 2px solid white;"></div>',
+                anchor: new naver.maps.Point(10, 10)
+            },
+            title: "내 위치"
+        });
+    
+        // 전체 화면 지도 정보를 저장
+        mapInfoFullscreen[index] = { map: fullscreenMap, userMarker };
+    
+        // 닫기 버튼 클릭 시 전체 화면 닫기 및 정리
         closeButton.addEventListener('click', () => {
             document.body.removeChild(fullscreenContainer);
+            delete mapInfoFullscreen[index];
         });
     }
 
     // 지도 리사이즈 처리를 담당하는 함수
-    function handleMapResize(map, latitude, longitude) {
-        naver.maps.Event.trigger(map, 'resize');
-        map.setCenter(new naver.maps.LatLng(latitude, longitude));
-    }
+    // function handleMapResize(map, latitude, longitude) {
+    //     naver.maps.Event.trigger(map, 'resize');
+    //     map.setCenter(new naver.maps.LatLng(latitude, longitude));
+    // }
 
     // 스피너 표시 함수
     function showSpinner() {
@@ -232,14 +248,17 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // 사용자 위치 업데이트 함수
-    function updateUserLocationOnMap(index, mapInstance = null) {
+    function updateUserLocationOnMap(index, mapInstance = null, userMarkerInstance = null) {
         const map = mapInstance || mapInfo[index].map;
+        const userMarker = userMarkerInstance || mapInfo[index].userMarker;
         if (!map) return;
 
         if (!isNaN(userLatitude) && !isNaN(userLongitude)) {
             const userPosition = new naver.maps.LatLng(userLatitude, userLongitude);
             
-            if (!mapInfo[index].userMarker) {
+            if (userMarker) {
+                userMarker.setPosition(userPosition);
+            } else {
                 mapInfo[index].userMarker = new naver.maps.Marker({
                     position: userPosition,
                     map: map,
@@ -249,11 +268,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     },
                     title: "내 위치"
                 });
-            } else {
-                mapInfo[index].userMarker.setPosition(userPosition);
             }
 
-            updateMapBounds(index, mapInstance);
+            updateMapBounds(index, map);
         }
     }
 
@@ -296,6 +313,12 @@ document.addEventListener("DOMContentLoaded", function() {
         // 모든 렌더링된 지도에 사용자 위치 업데이트
         Object.keys(mapInfo).forEach(index => {
             updateUserLocationOnMap(parseInt(index));
+        });
+
+        // 전체 화면 지도에도 사용자 위치 업데이트
+        Object.keys(mapInfoFullscreen).forEach(index => {
+            const { map, userMarker } = mapInfoFullscreen[index];
+            updateUserLocationOnMap(parseInt(index), map, userMarker);
         });
     });
 
