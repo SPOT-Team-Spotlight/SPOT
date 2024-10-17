@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="61b933e9-284a-493c-a226-0eb615b1c28a" name="Changes" comment="" />
+    <list default="true" id="61b933e9-284a-493c-a226-0eb615b1c28a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/js/recommendations.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/recommendations.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/js/results.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/results.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/js/search.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/search.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/vectorRouter/vectorMgr.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/vectorRouter/vectorMgr.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -57,6 +63,7 @@
       <recent name="C:\Users\201-18\Documents\GitHub\deeplearning\SPOT" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\shw26\Desktop\웤슾\SPOT" />
       <recent name="C:\Users\201-18\Documents\GitHub\deeplearning\SPOT" />
       <recent name="C:\Users\shw26\Desktop\웤슾\SPOT\venv" />
     </key>

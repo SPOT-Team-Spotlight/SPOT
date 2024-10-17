@@ -41,6 +41,14 @@ document.addEventListener("DOMContentLoaded", function() {
         `).join('');
 
         console.log("슬라이드 렌더링 완료:", swiperWrapper.innerHTML);
+        
+        const slides = document.querySelectorAll('.swiper-slide');
+        slides.forEach(slide => {
+            slide.addEventListener('click', function() {
+                const searchText = slide.textContent.trim();  // 슬라이드 텍스트를 가져옴
+                window.autoSearch(searchText);  // autoSearch 호출
+            });
+        });
     }
 
     // Render slides before Swiper initialization

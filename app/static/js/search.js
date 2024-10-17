@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const searchForm = document.getElementById('searchForm');
     const spinner = document.getElementById('spinner');
     const spinnerMessage = document.getElementById('spinnerMessage');
-    const video = document.getElementById('spinnerVideo');
 
     const messages = [
         "맛집 검색 중...",
@@ -27,14 +26,6 @@ document.addEventListener("DOMContentLoaded", function() {
     // 메시지 업데이트 함수
     function updateSpinnerMessage() {
         spinnerMessage.textContent = getRandomMessage();
-    }
-
-    //비디오 시작 시간을 랜덤하게 설정
-    function setRandomVideoStartTime() {   
-        if (video) {
-            const randomStartTime = Math.random() * video.duration;
-            video.currentTime = randomStartTime;
-        }
     }
 
     // 검색 폼 제출 이벤트 처리
@@ -78,20 +69,36 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // 페이지 로드 시 추천 카드 렌더링
-    renderRecommendationCards();
+   // renderRecommendationCards();
 
     // 자동 검색 함수 수정
     window.autoSearch = function(searchTerm) {
-        searchInput.value = searchTerm;
-        spinner.style.display = 'flex';
-        updateSpinnerMessage();
-        setRandomVideoStartTime(); 
-        const messageInterval = setInterval(updateSpinnerMessage, 2000);
-        searchForm.submit();
-
-        // 페이지 이동 시 인터벌 정리
-        window.addEventListener('unload', function() {
-            clearInterval(messageInterval);
-        });
+        // 검색 입력란과 폼, 스피너 요소 가져오기
+        const searchInput = document.getElementById('searchInput');  // 검색어 입력 필드
+        const searchForm = document.getElementById('searchForm');    // 검색 폼
+        const spinner = document.getElementById('spinner');          // 스피너 요소
+        
+        if (searchInput && searchForm && spinner) {
+            // 검색어 입력란에 searchTerm을 설정
+            searchInput.value = searchTerm;
+            
+            // 스피너 표시
+            spinner.style.display = 'flex';
+            
+            // 스피너 메시지 업데이트
+            updateSpinnerMessage();
+            const messageInterval = setInterval(updateSpinnerMessage, 2000);
+            
+            // 검색 폼 제출
+            searchForm.submit();
+    
+            // 페이지 이동 시 인터벌 정리
+            window.addEventListener('unload', function() {
+                clearInterval(messageInterval);
+            });
+        } else {
+            console.error("searchInput, searchForm, 또는 spinner를 찾을 수 없습니다.");
+        }
     };
+    
 });
