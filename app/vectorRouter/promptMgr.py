@@ -23,24 +23,36 @@ async def generate_gpt_response(name: str, full_content: str):
         data = {
             "model": "gpt-4o-mini",
             "messages": [
-                {"role": "system", "content": (
-                    "당신은 한국의 맛집 전문가입니다. "
-                    "사용자가 입력한 문장이나 단어를 바탕으로 맛집을 찾아주는 것이 목표입니다. "
-                    "사용자가 입력한 음식 이름에 맞는 맛집을 찾아줘야 합니다."
-                    "요약은 사용자가 가게를 빠르게 이해할 수 있도록 간결하고 명확해야 합니다. "
-                    "존댓말을 써서 예의바르고 친절한 말투로 답변해주세요."
-                )},
-                {"role": "user", "content": f"""
-                가게 이름: {name}\n
-                가게 설명: {full_content}\n
-                아래 항목을 기준으로 요약을 작성하세요:\n
-                대표 메뉴: 가게의 인기 메뉴를 강조하세요.\n
-                분위기: 가게의 분위기를 간결하게 설명하세요 (예: 로맨틱한, 캐주얼한, 가족 친화적인 등).\n
-                차별점: 이 가게만의 특별한 특징을 강조하세요.\n
-                최대 300자로 요약을 간결하게 작성하세요.
-                """}
+                    {
+                        "role": "system",
+                        "content": """
+                        
+                        # Task
+                        - 사용자가 가게를 빠르게 이해할 수 있도록 간결하고 명확해야 합니다.
+                        - output format 형태를 지켜주세요.
+                        - output format의 내용은 존댓말을 써서 예의 바르고 친절한 말투로 답변해주세요.
+                        """
+                    },
+                        {
+                            "role": "user",
+                            "content": f"""
+                            가게 이름: {name}
+                            가게 설명: {full_content}
+                    대표 메뉴: 가게의 인기 메뉴를 강조하세요.\n
+                    분위기: 가게의 분위기를 간결하게 설명하세요 (예: 로맨틱한, 캐주얼한, 가족 친화적인 등).\n
+                    차별점: 이 가게만의 특별한 특징을 강조하세요.\n
+                    
+                    # Output Format
+                    {{
+                        "대표메뉴": "",
+                        "분위기": "",
+                        "차별점": ""
+                    }}
+                    """
+                        }
             ],
-            "temperature": 0.7,
+
+            "temperature": 0.1,
             "max_tokens": 200,
             "top_p": 1,
             "frequency_penalty": 0.5,
@@ -56,13 +68,16 @@ async def generate_gpt_response(name: str, full_content: str):
 
                     # 강조 표시 제거 및 포맷팅
                     formatted_result = result.replace("**", "")  # 강조 표시 제거
+                    formatted_result = formatted_result.replace("{", "")  # 중괄호 제거
+                    formatted_result = formatted_result.replace("}", "")  # 중괄호 제거
+                    formatted_result = formatted_result.replace(",", "")  # 쉼표 제거
                     formatted_result = formatted_result.replace("\n", "<br>")
 
                     # 항목별로 줄바꿈 처리
                     formatted_result = formatted_result.replace("대표 메뉴:", "\n대표 메뉴:")\
                                                        .replace("분위기:", "\n분위기:")\
                                                        .replace("차별점:", "\n차별점:")
-
+                    
                     return formatted_result
                 else:
                     return f"요약 생성 실패: {response.status}"
