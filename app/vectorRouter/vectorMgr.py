@@ -163,7 +163,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 1,
         # 결과 수집 및 요약 생성
         seen = set()
         combined_results = defaultdict(list)
-        selected_results = []
+        formatted_result = []
         unique_names = set()
 
         start_time = time.time()
@@ -206,7 +206,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 1,
             task = generate_gpt_response(name, full_content,search_input)  # GPT 요약 요청
             tasks.append(task)
 
-            selected_results.append({
+            formatted_result.append({
                 "name": name,
                 "summary": "",
                 "address": address,
@@ -219,7 +219,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 1,
         summaries = await asyncio.gather(*tasks)  # 비동기 요약 요청 실행
 
         for i, summary in enumerate(summaries):
-            selected_results[i]['summary'] = summary  # 요약 결과를 삽입
+            formatted_result[i]['summary'] = summary  # 요약 결과를 삽입
 
         end_time = time.time()
         logging.info(f"전체 요약 생성 소요 시간: {end_time - start_time:.2f}초")  # 처리 시간 로그 출력
@@ -237,7 +237,7 @@ async def search_with_rag(search_input: str, k: int = 5, bm25_weight: float = 1,
 
         return {
             "generated_response": "검색 결과 요약 생성 완료",  # 최종 결과 반환
-            "results": selected_results
+            "results": formatted_result
         }
 
     except Exception as e:
